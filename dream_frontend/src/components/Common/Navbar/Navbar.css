@@ -1,0 +1,67 @@
+/* MAIN NAVBAR WRAPPER */
+.navbar-container {
+  position: fixed;       /* ← ALWAYS FIXED AT TOP */
+  top: 0;
+  left: 0;
+  width: 100%;
+
+  height: 70px;          /* ← LOCKED HEIGHT */
+  padding: 0 30px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  background: radial-gradient(circle at top, #372658, #2a375c);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+
+  z-index: 1000;         /* ← HIGHER THAN ANY CONTENT */
+}
+
+/* LEFT + RIGHT GROUPS */
+.navbar-left,
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+/* LOGO */
+.navbar-logo {
+  width: 60px;
+  height: auto;
+  cursor: pointer;
+  opacity: 0.95;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.navbar-logo:hover {
+  transform: scale(1.05);
+  opacity: 1;
+}
+
+/* LINKS */
+.nav-link {
+  color: white;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s, text-shadow 0.2s;
+}
+
+.nav-link:hover {
+  opacity: 0.8;
+  text-shadow: 0 0 8px rgba(255,255,255,0.4);
+}
+
+/* LOGOUT (STYLED LIKE A LINK) */
+.logout-button {
+  background: none;
+  border: none;
+  color: #ff6d6d;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1.1rem;
+}

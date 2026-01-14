@@ -1,0 +1,340 @@
+/* =====================================================
+   DREAM LIST — FINAL READABILITY & SEGMENTATION THEME
+   ===================================================== */
+
+:root {
+  --bg-main: #0b1020;
+  --bg-card: rgba(17, 24, 39, 0.85);
+  --bg-soft: rgba(30, 41, 59, 0.6);
+
+  --accent-main: #7c3aed;
+  --accent-soft: #a78bfa;
+  --accent-cyan: #22d3ee;
+
+  --text-main: #f8fafc;
+  --text-soft: #cbd5e1;
+  --text-muted: #94a3b8;
+
+  --border-soft: rgba(255, 255, 255, 0.06);
+}
+
+/* -----------------------------------------------------
+   CONTAINER
+----------------------------------------------------- */
+
+.dream-list-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+/* -----------------------------------------------------
+   EMPTY STATE
+----------------------------------------------------- */
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+/* -----------------------------------------------------
+   DREAM CARD
+----------------------------------------------------- */
+
+.dream-card {
+  background: linear-gradient(
+    145deg,
+    rgba(17, 24, 39, 0.9),
+    rgba(17, 24, 39, 0.75)
+  );
+  border-radius: 22px;
+  padding: 1.75rem 2rem;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
+}
+
+/* -----------------------------------------------------
+   HEADER
+----------------------------------------------------- */
+
+.dream-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  gap: 1rem;
+}
+
+.dream-title {
+  margin: 0;
+  font-size: 1.35rem;
+  color: var(--text-main);
+}
+
+.dream-date {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.dream-mood-badge {
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.25);
+  color: var(--text-main);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.expand-icon {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* -----------------------------------------------------
+   CONTENT WRAPPER
+----------------------------------------------------- */
+
+.dream-content {
+  margin-top: 2.5rem;
+}
+
+/* -----------------------------------------------------
+   SECTION SEPARATION
+----------------------------------------------------- */
+
+.analysis-section {
+  margin-top: 2.75rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-soft);
+}
+
+.analysis-section:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.analysis-section h4 {
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--accent-soft);
+}
+
+/* -----------------------------------------------------
+   INTERPRETATION (PRIMARY CONTENT)
+----------------------------------------------------- */
+
+.interpretation {
+  background: linear-gradient(
+    145deg,
+    rgba(124, 58, 237, 0.18),
+    rgba(124, 58, 237, 0.05)
+  );
+  border-left: 4px solid var(--accent-main);
+  padding: 1.75rem 2rem;
+  border-radius: 18px;
+  font-size: 1.05rem;
+  line-height: 1.9;
+  color: var(--text-main);
+}
+
+.interpretation-paragraph {
+  margin-bottom: 1.4rem;
+  max-width: 72ch;
+}
+
+.interpretation-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+.interpretation-list {
+  margin: 1.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.interpretation-list li {
+  margin-bottom: 0.8rem;
+  line-height: 1.6;
+  color: #e9d5ff;
+}
+
+.interpretation-list li::marker {
+  color: var(--accent-soft);
+}
+
+/* -----------------------------------------------------
+   DREAM TEXT (SECONDARY CONTENT)
+----------------------------------------------------- */
+
+.dream-text {
+  background: var(--bg-soft);
+  padding: 1.5rem 1.75rem;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-soft);
+  max-width: 75ch;
+}
+
+/* -----------------------------------------------------
+   EMOTION METRICS
+----------------------------------------------------- */
+
+.metric-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.metric {
+  background: var(--bg-soft);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+}
+
+.metric-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.metric-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+/* -----------------------------------------------------
+   TRAJECTORY
+----------------------------------------------------- */
+
+.trajectory-path {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.trajectory-node {
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: rgba(34, 211, 238, 0.18);
+  color: #e0f2fe;
+}
+
+.trajectory-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  max-width: 70ch;
+}
+
+/* -----------------------------------------------------
+   SYMBOLS
+----------------------------------------------------- */
+
+.symbols-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.symbol-item {
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+}
+
+.symbol-name {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+  color: #e9d5ff;
+}
+
+.symbol-bar {
+  position: relative;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.symbol-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #a78bfa, #7c3aed);
+}
+
+.symbol-score {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-soft);
+}
+
+/* -----------------------------------------------------
+   METRICS GRID
+----------------------------------------------------- */
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.25rem;
+}
+
+.metric-card {
+  background: rgba(124, 58, 237, 0.12);
+  border-radius: 16px;
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.metric-value-lg {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.metric-card.trauma {
+  background: rgba(239, 68, 68, 0.18);
+}
+
+/* -----------------------------------------------------
+   FOOTER
+----------------------------------------------------- */
+
+.dream-footer {
+  margin-top: 2.25rem;
+  text-align: right;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* -----------------------------------------------------
+   ANIMATION (SUBTLE)
+----------------------------------------------------- */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.analysis-section {
+  animation: fadeInUp 0.45s ease both;
+}

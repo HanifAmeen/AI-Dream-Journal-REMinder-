@@ -1,0 +1,129 @@
+/* ------------------------------------------------------
+   GLOBAL RESET (SAFE – does NOT interfere with pages)
+------------------------------------------------------ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ------------------------------------------------------
+   DO NOT PUT BACKGROUNDS ON body, html, or app-wrapper!
+   This prevents overriding Login/Signup backgrounds.
+------------------------------------------------------ */
+html, body {
+  width: 100%;
+  height: 100%;          /* FIXED — was 100vh (incorrect) */
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background: none !important;
+}
+
+/* React root + app container for sticky footer */
+#root, .App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ------------------------------------------------------
+   MAIN APP LAYOUT (applies ONLY to authenticated pages)
+   This is the wrapper for Home, Dream Analyzer, etc.
+------------------------------------------------------ */
+.page-wrapper {
+  flex: 1;                       /* IMPORTANT for sticky footer */
+  width: 100%;
+  min-height: auto;
+  background: #0b0f1a;           /* your app theme */
+  background-size: cover;
+  background-repeat: no-repeat;
+  padding-top: 70px;             /* for navbar spacing */
+}
+
+/* ------------------------------------------------------
+   Navbar spacing (keep if needed)
+------------------------------------------------------ */
+.navbar-placeholder {
+  height: 60px;
+}
+
+/* ------------------------------------------------------
+   Logout button (no change needed)
+------------------------------------------------------ */
+.logout-btn {
+  background-color: transparent;
+  color: white;
+  border: 1px solid #fff;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.logout-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ------------------------------------------------------
+   AUTH FORMS: DO NOT STYLE THESE HERE
+   Login + Signup will have their OWN CSS files.
+------------------------------------------------------ */
+.auth-container {
+  /* empty by design */
+}
+
+/* ------------------------------------------------------
+   FOOTER (fully working sticky version)
+------------------------------------------------------ */
+
+/* .footer {
+  background: #0b0b0b;
+  padding: 40px 0;
+  text-align: center;
+  color: #ffffff;
+  border-top: 1px solid #222;
+
+
+  margin-top: auto;
+}
+
+.footer-icons {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin-bottom: 20px;
+}
+
+.footer-icons a {
+  color: white;
+  font-size: 24px;
+  transition: 0.3s;
+}
+
+.footer-icons a:hover {
+  transform: scale(1.15);
+  color: #d4d4d4;
+}
+
+.footer-links {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.footer-links a {
+  color: #ffffff;
+  font-size: 15px;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.footer-links a:hover {
+  color: #d4d4d4;
+}
+
+.footer-copy {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-top: 10px;
+} */

@@ -1,0 +1,294 @@
+/* --- Moon Knight Themed Form v2.0 — ENHANCED & RESPONSIVE --- */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+/* CSS CUSTOM PROPERTIES for Moon Knight Palette [web:2] */
+:root {
+  --mk-black: #000000;
+  --mk-white: #ffffff;
+  --mk-light-gray: #a7a7a7;
+  --mk-dark-gray: #787878;
+  --mk-marvel-red: #ed2924;
+  
+  --mk-bg-primary: #0a0a0f;
+  --mk-bg-secondary: #1a1a24;
+  --mk-surface: rgba(20, 20, 30, 0.98);
+  --mk-glow-purple: #6a1b9a;
+  --mk-glow-red: #ed2924;
+  --mk-text-primary: #e0e0ff;
+  --mk-text-secondary: #b0b0ff;
+  --mk-border: #6a1b9a;
+}
+
+/* General page styling */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: 'Orbitron', monospace;
+  background: linear-gradient(135deg, var(--mk-bg-primary) 0%, var(--mk-bg-secondary) 100%);
+  color: var(--mk-text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* RESPONSIVE Container [web:15] */
+.dream-form-container {
+  background: var(--mk-surface);
+  padding: clamp(30px, 5vw, 60px);
+  border-radius: 20px;
+  box-shadow: 
+    0 0 40px rgba(106, 27, 154, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+  border: 1px solid var(--mk-border);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.dream-form-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--mk-glow-red), transparent);
+  animation: shimmer 3s infinite;
+}
+
+/* Title styling — Moon Knight Bold */
+.dream-form-title {
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 900;
+  margin-bottom: 30px;
+  color: var(--mk-text-secondary);
+  text-shadow: 
+    0 0 20px var(--mk-glow-red),
+    0 0 40px var(--mk-glow-purple);
+  letter-spacing: 2px;
+  position: relative;
+}
+
+.dream-form-title::after {
+  
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: var(--mk-marvel-red);
+  opacity: 0.7;
+  font-weight: 700;
+}
+
+/* ENHANCED Inputs [web:8] */
+.dream-input,
+.dream-textarea {
+  width: 100%;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  border-radius: 16px;
+  border: 2px solid rgba(106, 27, 154, 0.3);
+  font-size: 16px;
+  font-family: 'Orbitron', monospace;
+  background: rgba(10, 10, 15, 0.8);
+  color: var(--mk-text-primary);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+}
+
+.dream-input:focus,
+.dream-textarea:focus {
+  outline: none;
+  border-color: var(--mk-glow-red);
+  box-shadow: 
+    0 0 0 4px rgba(237, 41, 36, 0.2),
+    0 0 20px rgba(237, 41, 36, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.dream-input::placeholder,
+.dream-textarea::placeholder {
+  color: var(--mk-light-gray);
+  opacity: 0.8;
+}
+
+/* Textarea height */
+.dream-textarea {
+  height: 140px;
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* ENHANCED Button [web:18] */
+.dream-button {
+  background: linear-gradient(45deg, var(--mk-glow-purple), var(--mk-glow-red));
+  color: var(--mk-white);
+  padding: 16px 40px;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'Orbitron', monospace;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  min-height: 56px;
+}
+
+.dream-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.6s;
+}
+
+.dream-button:hover::before {
+  left: 100%;
+}
+
+.dream-button:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 15px 35px rgba(237, 41, 36, 0.4),
+    0 5px 15px rgba(106, 27, 154, 0.3);
+}
+
+.dream-button:active {
+  transform: translateY(-2px);
+}
+
+/* Disabled button state */
+.dream-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Message styling */
+.dream-message {
+  margin-top: 20px;
+  padding: 15px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 16px;
+  animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.success-msg {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.4);
+}
+
+/* ENHANCED Loader [web:5] */
+.loader {
+  margin: 20px auto;
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top: 3px solid var(--mk-marvel-red);
+  border-radius: 50%;
+  animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  position: relative;
+}
+
+.loader::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  background: var(--mk-marvel-red);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulse 1.5s infinite;
+}
+
+/* Mic Recording — ENHANCED */
+@keyframes micPulse {
+  0%, 100% { 
+    box-shadow: 0 0 15px rgba(237, 41, 36, 0.6), 0 0 30px rgba(237, 41, 36, 0.4); 
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(237, 41, 36, 1), 0 0 60px rgba(237, 41, 36, 0.6); 
+  }
+}
+
+.mic-button.recording {
+  animation: micPulse 1.2s infinite ease-in-out;
+  background: linear-gradient(45deg, var(--mk-marvel-red), #b71c1c) !important;
+  box-shadow: 0 0 20px rgba(237, 41, 36, 0.6);
+  transform: scale(1.05);
+}
+
+/* ANIMATIONS */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.7; }
+}
+
+@keyframes slideInUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+  body { padding: 10px; }
+  
+  .dream-form-container {
+    padding: 25px 20px;
+    margin: 10px;
+    border-radius: 16px;
+  }
+  
+  .dream-form-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .dream-button {
+    padding: 14px 30px;
+    font-size: 15px;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .dream-form-container {
+    border-width: 0.5px;
+  }
+}

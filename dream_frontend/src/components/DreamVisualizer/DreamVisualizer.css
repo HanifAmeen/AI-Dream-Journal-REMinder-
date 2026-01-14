@@ -1,0 +1,255 @@
+.visualizer-container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 40px 20px;
+  color: white;
+  background: #0b0f1a;
+}
+
+.visualizer-title {
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.dream-input-visualizer {
+  width: 90%;              /* big and responsive */
+  max-width: 700px;        /* perfect size on desktop */
+  margin: 0 auto 20px auto;/* center horizontally */
+  
+  height: 20px;
+  padding: 14px;
+  border-radius: 10px;
+  background: #111827;
+  color: white;
+  border: 1px solid #334155;
+  resize: none;
+  font-size: 16px;
+  display: block;          /* ensures margin auto works */
+}
+
+
+.generate-btn {
+  display: block;
+  width: 90%;
+max-width: 350px;  
+margin: 0 auto 20px auto; 
+  padding: 14px;
+  font-size: 16px;
+  background: #4f46e5;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.generate-btn:hover {
+  background: #4338ca;
+}
+
+.loading-spinner {
+  margin: 20px 0;
+  text-align: center;
+  font-size: 18px;
+  opacity: 0.7;
+}
+
+.image-gallery {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 15px;
+}
+
+.image-gallery img {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #1f2937;
+  object-fit: cover;
+  transition: transform 0.25s ease;
+}
+
+.image-gallery img:hover {
+  transform: scale(1.03);
+}
+
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.image-wrapper {
+  position: relative;
+}
+
+.dream-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+   max-width: 320px;
+}
+
+.delete-img-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+}
+.visualizer-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.visualizer-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.input-card {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(8px);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.dream-input-visualizer {
+  width: 100%;
+  min-height: 140px;
+  resize: vertical;
+  padding: 14px 16px;
+  font-size: 1rem;
+  line-height: 1.6;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  outline: none;
+}
+
+.dream-input-visualizer::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.input-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.generate-btn,
+.clear-btn {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+   transition: background-color 0.5s ease, color 0.2s ease;
+}
+
+.clear-btn:hover {
+  background-color: tomato;
+  color: wheat;
+}
+
+.generate-btn {
+  background: linear-gradient(135deg, #6b8cff, #9f7aea);
+  color: #fff;
+}
+
+.generate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.clear-btn {
+  background: transparent;
+  color: #ddd;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.loading-spinner {
+  text-align: center;
+  margin: 20px 0;
+  opacity: 0.85;
+}
+
+.error-text {
+  color: #ff6b6b;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.image-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #111;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.image-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+}
+
+.dream-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.65),
+    rgba(0, 0, 0, 0)
+  );
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 12px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.image-card:hover .image-overlay {
+  opacity: 1;
+}
+
+.image-overlay span {
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.delete-img-btn {
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+}

@@ -1,0 +1,99 @@
+/* src/components/Dream_analyzer/DreamPage.css
+   Scoped layout for DreamAnalyzer (form + list side-by-side)
+*/
+
+.dream-journal-page {
+  padding-top: 110px; /* keep below fixed navbar (adjust if your navbar height differs) */
+  padding-left: 32px;
+  padding-right: 32px;
+  padding-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(to bottom, #0b0b0f, #1a1a24);
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+  color: #e0e0ff;
+}
+
+/* Title */
+.dream-page-title {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 32px;
+  color: #b0b0ff;
+  text-shadow: 0 0 12px #8e24aa;
+}
+
+/* Two-column layout */
+.dream-dashboard {
+  display: flex;
+  gap: 28px;
+  width: 100%;
+  height: calc(100vh - 180px); /* adjust if navbar size changes */
+  overflow: hidden;
+  box-sizing: border-box;
+  align-items: stretch;
+}
+
+/* Left column: form */
+.dream-form-wrapper {
+  flex: 1 1 420px;   /* will try to be 420px, but share equally if space allows */
+  min-width: 340px;  /* prevents collapsing too small */
+  max-width: 50%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 22px;
+  border-radius: 14px;
+  background: rgba(20,20,30,0.98);
+  border: 1px solid rgba(106,27,154,0.25);
+  box-shadow: 0 6px 18px rgba(138,43,226,0.16);
+  box-sizing: border-box;
+}
+
+/* Right column: list */
+.dream-list-wrapper {
+  flex: 1 1 640px;
+  min-width: 360px;
+  max-width: 50%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 22px;
+  border-radius: 14px;
+  background: rgba(15,15,25,0.95);
+  box-shadow: inset 0 0 18px rgba(138,43,226,0.12);
+  box-sizing: border-box;
+}
+
+/* scrollbar style (only inside these two wrappers) */
+.dream-form-wrapper::-webkit-scrollbar,
+.dream-list-wrapper::-webkit-scrollbar {
+  width: 10px;
+}
+
+.dream-form-wrapper::-webkit-scrollbar-thumb,
+.dream-list-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(106,27,154,0.9);
+  border-radius: 6px;
+}
+
+/* responsive: stack vertically under 980px */
+@media (max-width: 980px) {
+  .dream-dashboard {
+    flex-direction: column;
+    height: auto;
+  }
+  .dream-form-wrapper,
+  .dream-list-wrapper {
+    max-width: 100%;
+    min-width: 0;
+    height: auto;
+  }
+  .dream-page-title { font-size: 26px; }
+}
+
+/* small mobile tweaks */
+@media (max-width: 520px) {
+  .dream-journal-page { padding: 80px 14px 20px; }
+  .dream-page-title { font-size: 22px; }
+}

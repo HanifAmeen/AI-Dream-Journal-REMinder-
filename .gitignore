@@ -6,6 +6,7 @@ __pycache__/
 *.pyo
 *.pyd
 .env
+.venv/
 venv/
 
 # =========================
@@ -16,29 +17,48 @@ venv/
 *.sqlite3
 
 # =========================
+# Generated images / outputs (CRITICAL)
+# =========================
+dream_output/
+*.png
+*.jpg
+*.jpeg
+*.webp
+
+# =========================
 # Datasets (large / external)
 # =========================
 datasets/*.csv
+datasets/*.npy
+datasets/*.json
 
 # =========================
 # Trained models & artifacts
 # =========================
-models/*.pkl
-models/symbol_index/
+models/
 utils/artifacts/
+*.pkl
 *.joblib
+*.pt
+*.bin
+
+# =========================
+# Node / frontend
+# =========================
+node_modules/
+build/
+dist/
 
 # =========================
 # Temporary / editor junk
 # =========================
 tempCodeRunnerFile.py
 .vscode/
+.idea/
 .DS_Store
 Thumbs.db
 
 # =========================
-# Node / frontend (if added later)
+# OS / logs
 # =========================
-node_modules/
-build/
-dist/
+*.log
