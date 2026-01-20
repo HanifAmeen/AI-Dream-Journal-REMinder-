@@ -13,6 +13,10 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 import Navbar from "./components/Common/Navbar/Navbar";
 import Home from "./components/Home/HomePage";
+
+import ChatbotButton from "./components/Chatbot/ChatbotButton";
+import ChatbotPanel from "./components/Chatbot/ChatbotPanel";
+
 import Footer from "./components/Common/Footer/footer";
 
 
@@ -155,6 +159,15 @@ function App() {
         </div>
 
         <Footer />
+        {/* 👇 Global Chatbot */}
+          <ChatbotButton />
+          <ChatbotPanel
+            page={
+              location.pathname.includes("dream-analyzer")
+                ? "analysis"
+                : "home"
+            }
+          />
       </div>
     )}
   </>

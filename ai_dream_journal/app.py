@@ -10,6 +10,9 @@ BASE_DIR = Path(__file__).resolve().parent
 
 ANALYZER_DIR = BASE_DIR / "dream_Analyzer"
 VISUALIZER_DIR = BASE_DIR / "dream_visualizer"
+CHATBOT_DIR = BASE_DIR / "Chatbot"
+sys.path.insert(0, str(CHATBOT_DIR))
+
 
 sys.path.insert(0, str(ANALYZER_DIR))
 sys.path.insert(0, str(VISUALIZER_DIR))
@@ -35,6 +38,10 @@ from functools import wraps
 from scene_splitter import split_into_scenes
 from prompt_builder import build_prompt
 from image_generator import generate_image
+from chatbot_api import chatbot_bp
+
+
+
 
 # -------------------------------------------------
 # ✅ IMPORTS — EXACTLY FROM dream_analyzer
@@ -58,6 +65,9 @@ from confidence_utils import (
 # -------------------------------------------------
 # 🛡️ SAFE SERIALIZATION HELPERS
 # -------------------------------------------------
+
+
+
 def ensure_string(value):
     if isinstance(value, str):
         return value
@@ -99,6 +109,8 @@ SECRET_KEY = os.environ.get("REMINDER_SECRET_KEY", "CHANGE_THIS_SECRET")
 
 app = Flask(__name__)
 CORS(app)
+
+app.register_blueprint(chatbot_bp)
 
 DB_PATH = BASE_DIR / "dreams.db"
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"

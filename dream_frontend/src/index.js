@@ -4,15 +4,20 @@ import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { ChatbotProvider } from "./context/ChatbotContext";
+
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <ChatbotProvider>
+        <App />
+      </ChatbotProvider>
     </BrowserRouter>
   </React.StrictMode>
 );
+
 
 reportWebVitals();

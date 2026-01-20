@@ -1,53 +1,54 @@
 import React, { useEffect, useState, useRef } from "react";
 import "./home.css";
 import ActionCard from "../Common/ActionCard/ActionCard";
+import { useChatbot } from "../../context/ChatbotContext";
 
 export default function Home() {
   const user = JSON.parse(localStorage.getItem("user"));
   const justLoggedIn = localStorage.getItem("justLoggedIn") === "true";
-  
+
+  const { toggleChat, setMessages } = useChatbot();
+
   const [title, setTitle] = useState("REMinder");
   const [fade, setFade] = useState(true);
   const timerRef = useRef(null);
 
   // Initial title setup
-  React.useEffect(() => {
+  useEffect(() => {
     if (justLoggedIn && user?.username) {
       setTitle(`Welcome Back ${user.username}`);
     }
   }, []);
 
-  // Animation effect - FIXED
+  // Animation effect
   useEffect(() => {
     if (!justLoggedIn) return;
 
-    console.log("Animation started - justLoggedIn:", justLoggedIn);
-    
-    // Cancel any existing timer
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
+    if (timerRef.current) clearTimeout(timerRef.current);
 
-    // 10 SECOND timer
     timerRef.current = setTimeout(() => {
-      console.log("Fading out welcome message");
       setFade(false);
 
-      // Fade out complete → switch title → fade in
       setTimeout(() => {
-        console.log("Switching to REMinder");
         setTitle("REMinder");
         setFade(true);
         localStorage.setItem("justLoggedIn", "false");
       }, 600);
-    }, 10000); // CHANGED FROM 100ms to 10s
+    }, 10000);
 
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
+    return () => clearTimeout(timerRef.current);
   }, [justLoggedIn]);
+
+  // 🔹 Chatbot starter
+  const openDreamGuide = () => {
+    toggleChat();
+    setMessages([
+      {
+        role: "bot",
+        text: "You can ask me anything about dreams — symbols, meanings, or patterns."
+      }
+    ]);
+  };
 
   const features = [
     { title: "Add a Dream", subtitle: "Record your dream instantly", to: "/add-dream", icon: "✨" },
@@ -70,6 +71,11 @@ export default function Home() {
           <p className="hero-subtitle">
             Unlock the secrets of your subconscious
           </p>
+
+          {/* 🔹 Step 6 Chatbot CTA */}
+          <button className="cta-button" onClick={openDreamGuide}>
+            Ask the Dream Guide
+          </button>
         </div>
       </div>
 
@@ -81,33 +87,27 @@ export default function Home() {
               <h2>What REMinder Does</h2>
               <p>Transform your dreams into meaningful insights</p>
             </div>
-            
+
             <div className="services-grid">
               {features.slice(0, 3).map((feature, index) => (
                 <div key={index} className="service-card">
                   <div className="service-icon">{feature.icon}</div>
                   <h3>{feature.title}</h3>
                   <p>{feature.subtitle}</p>
-                  <ActionCard title={feature.title} subtitle={feature.subtitle} to={feature.to} icon={feature.icon} />
+                  <ActionCard {...feature} />
                 </div>
               ))}
             </div>
-            
+
             <div className="services-grid bottom-grid">
               {features.slice(3).map((feature, index) => (
                 <div key={index + 3} className="service-card">
                   <div className="service-icon">{feature.icon}</div>
                   <h3>{feature.title}</h3>
                   <p>{feature.subtitle}</p>
-                  <ActionCard title={feature.title} subtitle={feature.subtitle} to={feature.to} icon={feature.icon} />
+                  <ActionCard {...feature} />
                 </div>
               ))}
-            </div>
-            
-            <div className="all-services">
-              <a href="/features" className="cta-button">
-                View All Features
-              </a>
             </div>
           </div>
         </section>
