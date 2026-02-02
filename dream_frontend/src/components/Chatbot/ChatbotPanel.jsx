@@ -77,7 +77,7 @@ export default function ChatbotPanel({ page, dreamContext }) {
 
   return (
  <div className="chatbot-panel">
-  <div className="chatbot-header">REMinder Guide</div>
+  <div className="chatbot-header">Spectors Corner</div>
 
   <div className="chatbot-messages">
     {messages.map((m, i) => (
@@ -101,7 +101,7 @@ export default function ChatbotPanel({ page, dreamContext }) {
     <Mascot state="thinking" small />
 
     <div className="chatbot-message-bubble bot typing">
-      REMinder is thinking
+      Spector is thinking
       <span className="dot">.</span>
       <span className="dot">.</span>
       <span className="dot">.</span>
