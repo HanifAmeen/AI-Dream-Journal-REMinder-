@@ -12,7 +12,7 @@
   overflow-x: hidden;
 }
 
-/* Hero Background - Full Width Purple Gradient */
+/* Hero Background - Dream Nebula Sky */
 .hero-background {
   position: relative;
   height: 100vh;
@@ -23,6 +23,135 @@
   overflow: hidden;
 }
 
+/* Decorative hero layers should not block clicks */
+.hero-background::before,
+.hero-overlay,
+.hero-overlay::after,
+.dream-symbols,
+.symbol {
+  pointer-events: none;
+}
+
+.hero-background::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, white, transparent),
+    radial-gradient(1px 1px at 60% 70%, #c892ff, transparent),
+    radial-gradient(2px 2px at 80% 40%, white, transparent),
+    radial-gradient(1px 1px at 40% 80%, #e0e0ff, transparent);
+  opacity: 0.4;
+  animation: starsMove 60s linear infinite;
+}
+
+@keyframes starsMove {
+  from { transform: translateY(0); }
+  to { transform: translateY(-200px); }
+}
+
+/* Dream Symbols Container */
+.dream-symbols {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Dream Symbol Base Style */
+.symbol {
+  position: absolute;
+  font-size: 4rem;
+  opacity: 0.9;
+  filter: 
+    drop-shadow(0 0 25px rgba(255,255,255,0.9))
+    drop-shadow(0 0 35px rgba(200,146,255,1));
+  animation: 
+    floatSymbol linear infinite,
+    glowPulseSymbol 6s ease-in-out infinite;
+  animation-delay: calc(-5s * var(--i, 1));
+}
+
+/* Varying Symbol Sizes */
+.symbol:nth-child(odd) {
+  font-size: 3.5rem;
+}
+
+.symbol:nth-child(even) {
+  font-size: 5rem;
+}
+
+/* Individual Symbol Positions & Speeds */
+.moon {
+  left: 10%;
+  animation-duration: 26s;
+}
+
+.eye {
+  left: 30%;
+  animation-duration: 30s;
+}
+
+.key {
+  left: 50%;
+  animation-duration: 24s;
+}
+
+.door {
+  left: 70%;
+  animation-duration: 32s;
+}
+
+.stairs {
+  left: 85%;
+  animation-duration: 28s;
+}
+
+.water {
+  left: 15%;
+  animation-duration: 34s;
+}
+
+.mask {
+  left: 60%;
+  animation-duration: 27s;
+}
+
+@keyframes floatSymbol {
+  0% {
+    transform: translate(0, 100vh) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate(20px, 30vh) rotate(180deg);
+  }
+  85% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-20px, -20vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes glowPulseSymbol {
+  0%, 100% {
+    filter: 
+      drop-shadow(0 0 25px rgba(255,255,255,0.9)) 
+      drop-shadow(0 0 35px rgba(200,146,255,0.9));
+  }
+  50% {
+    filter: 
+      drop-shadow(0 0 45px rgba(255,255,255,1)) 
+      drop-shadow(0 0 55px rgba(200,146,255,1));
+  }
+}
+
+/* Hero overlay */
 .hero-overlay {
   position: absolute;
   top: 0;
@@ -32,12 +161,30 @@
   background: 
     radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(200,146,255,0.15) 0%, transparent 50%),
-    linear-gradient(45deg, rgba(47,25,91,0.8) 0%, rgba(11,15,26,0.95) 100%);
+    linear-gradient(45deg, rgba(47,25,91,0.6), rgba(11,15,26,0.75));
+  z-index: 2;
+  pointer-events: none;
+}
+
+.hero-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 60%, rgba(200,146,255,0.25), transparent 60%),
+    radial-gradient(circle at 20% 40%, rgba(255,255,255,0.12), transparent 60%);
+  animation: fogMove 20s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes fogMove {
+  from { transform: translateX(-30px); }
+  to { transform: translateX(30px); }
 }
 
 .hero-content {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   text-align: center;
   max-width: 800px;
   padding: 0 2rem;
@@ -65,7 +212,7 @@
 /* Main Content */
 .main-content {
   position: relative;
-  z-index: 3;
+  z-index: 4;
   background: linear-gradient(180deg, #0b0f1a 0%, #1a0d2e 100%);
 }
 
@@ -101,84 +248,104 @@
   margin: 0 auto;
 }
 
-/* Services Grid - Two Rows */
+/* ✅ FIXED Services Grid & Cards */
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2.5rem;
   margin-bottom: 2rem;
 }
 
-.bottom-grid {
-  margin-top: 1rem;
-}
-
-.service-card {
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 24px;
-  padding: 3rem 2rem;
+.service-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s ease;
+}
+
+.service-card-image-wrapper {
   position: relative;
+  width: 100%;
+  height: 420px;
+  border-radius: 24px;
   overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.15);
+  transition: all 0.4s ease;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  animation: floatCard 8s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 0.2s);
+  margin-bottom: 1.5rem;
 }
 
-.service-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+.service-card-image-wrapper:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 
+    0 30px 80px rgba(0,0,0,0.9),
+    0 0 40px rgba(200,146,255,0.6);
 }
 
-.service-card:hover {
-  transform: translateY(-16px);
-  background: rgba(255,255,255,0.12);
-  border-color: rgba(200,146,255,0.4);
-  box-shadow: 0 30px 60px rgba(0,0,0,0.5);
-}
-
-.service-icon {
-  font-size: 4rem;
+.service-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
   display: block;
-  margin-bottom: 1.5rem;
-  filter: drop-shadow(0 0 20px rgba(200,146,255,0.4));
+  transition: transform 0.4s ease;
 }
 
-.service-card h3 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: #ffffff;
+.service-card-image-wrapper:hover .service-card-image {
+  transform: scale(1.05);
 }
 
-.service-card p {
-  opacity: 0.8;
+.service-title {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(45deg, #ffffff, #c892ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+}
+
+.service-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
   line-height: 1.6;
-  margin-bottom: 1.5rem;
+  max-width: 280px;
+  margin: 0 auto;
+  color: #e0e0ff;
+  text-shadow: 0 1px 5px rgba(0,0,0,0.8);
 }
 
-.service-link {
-  color: #c892ff;
-  font-weight: 500;
-  transition: all 0.3s ease;
+/* Legacy service-card styles (kept for ActionCard compatibility) */
+.service-card {
+  position: relative;
+  min-height: 420px;
+  border-radius: 24px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 1px solid rgba(255,255,255,0.15);
+  transition: all .4s ease;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  animation: floatCard 8s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 0.15s);
 }
 
-.service-card:hover .service-link {
-  color: #ffffff;
-  text-shadow: 0 0 10px #c892ff;
+/* Card animations */
+@keyframes floatCard {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+  100% { transform: translateY(0px); }
 }
 
 /* CTA Button */
-.all-services {
-  text-align: center;
-  margin-top: 4rem;
-}
-
 .cta-button {
+  position: relative;
+  overflow: hidden;
   display: inline-block;
   background: linear-gradient(45deg, #c892ff, #8e24aa);
   color: white;
@@ -189,6 +356,29 @@
   font-size: 1.1rem;
   transition: all 0.3s ease;
   box-shadow: 0 10px 30px rgba(200,146,255,0.4);
+  cursor: pointer;
+  border: none;
+}
+
+.cta-button::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(255,255,255,0.4),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+
+.cta-button:hover::before {
+  opacity: 1;
 }
 
 .cta-button:hover {
@@ -236,19 +426,32 @@
 @media (max-width: 768px) {
   .services-grid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 2rem;
   }
   
   .services-section {
     padding: 4rem 0 2rem;
   }
   
+  .service-card-image-wrapper,
   .service-card {
-    padding: 2rem 1.5rem;
+    min-height: 350px;
   }
   
   .hero-background {
     height: 80vh;
+  }
+  
+  .symbol {
+    font-size: 3rem;
+  }
+  
+  .symbol:nth-child(odd) {
+    font-size: 2.5rem;
+  }
+  
+  .symbol:nth-child(even) {
+    font-size: 3.8rem;
   }
 }
 
@@ -260,4 +463,22 @@
   .hero-title {
     font-size: 2.5rem;
   }
+  
+  .symbol {
+    font-size: 2.5rem;
+  }
+  
+  .service-card-image-wrapper {
+    height: 300px;
+  }
+  
+  .service-title {
+    font-size: 1.6rem;
+  }
+}
+
+/* Scrollbar styles */
+html {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(138, 43, 226, 0.9) rgba(15, 15, 25, 0.4) !important;
 }

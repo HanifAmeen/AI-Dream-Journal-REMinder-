@@ -19,11 +19,10 @@ The wind carried the sound of bells, though none of the goats wore any.
 As the mist closed in, the goats faded into the light, and I woke up feeling grounded and peaceful.
 """
 
-
 # ------------------------------------
 # PARAMETERS
 # ------------------------------------
-CHUNK_SIZE = 50
+MIN_WORDS = 40
 MAX_SCENES = 8
 
 # ------------------------------------
@@ -31,7 +30,7 @@ MAX_SCENES = 8
 # ------------------------------------
 scenes = split_into_scenes(
     dream_text,
-    chunk_size=CHUNK_SIZE,
+    min_words=MIN_WORDS,
     max_scenes=MAX_SCENES
 )
 
@@ -39,7 +38,7 @@ total = len(scenes)
 
 print(f"\nScenes generated: {total}")
 for i, s in enumerate(scenes):
-    print(f"\n--- Scene {i} ({len(s.split())} words) ---\n{s}")
+    print(f"\n--- Scene {i+1} ({len(s.split())} words) ---\n{s}")
 
 # ------------------------------------
 # IMAGE GENERATION WITH PROGRESS

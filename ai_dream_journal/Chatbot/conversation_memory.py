@@ -1,14 +1,140 @@
-from collections import deque
+import sqlite3
+import uuid
+
 
 class ConversationMemory:
-    def __init__(self, max_turns=4):
-        self.history = deque(maxlen=max_turns)
 
-    def add_user(self, text):
-        self.history.append(f"User: {text}")
+    def __init__(self, db_path="dreams.db"):
+        self.db_path = db_path
+        self._init_db()
 
-    def add_bot(self, text):
-        self.history.append(f"Bot: {text}")
+    # ----------------------------------
+    # Create tables if they don't exist
+    # ----------------------------------
+    def _init_db(self):
 
-    def render(self):
-        return "\n".join(self.history)
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS conversations (
+            id TEXT PRIMARY KEY,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
+
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            conversation_id TEXT,
+            role TEXT,
+            content TEXT,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
+
+        conn.commit()
+        conn.close()
+
+    # ----------------------------------
+    # Start new chat
+    # ----------------------------------
+    def start_new_conversation(self):
+
+        conversation_id = str(uuid.uuid4())
+
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+
+        cur.execute(
+            "INSERT INTO conversations (id) VALUES (?)",
+            (conversation_id,)
+        )
+
+        conn.commit()
+        conn.close()
+
+        return conversation_id
+
+    # ----------------------------------
+    # Save message
+    # ----------------------------------
+    def add_message(self, conversation_id, role, content):
+
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+
+        cur.execute(
+            """
+            INSERT INTO messages (conversation_id, role, content)
+            VALUES (?, ?, ?)
+            """,
+            (conversation_id, role, content)
+        )
+
+        conn.commit()
+        conn.close()
+
+    # ----------------------------------
+    # Return formatted history for LLM
+    # ----------------------------------
+    def get_history(self, conversation_id, limit=10):
+
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+
+        cur.execute(
+            """
+            SELECT role, content
+            FROM messages
+            WHERE conversation_id = ?
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (conversation_id, limit)
+        )
+
+        rows = cur.fetchall()
+        conn.close()
+
+        rows.reverse()
+
+        formatted = []
+        for role, content in rows:
+            if role == "user":
+                formatted.append(f"User: {content}")
+            else:
+                formatted.append(f"Spectre: {content}")
+
+        return "\n".join(formatted)
+
+    # ----------------------------------
+    # Return messages for frontend
+    # ----------------------------------
+    def get_messages(self, conversation_id):
+
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+
+        cur.execute(
+            """
+            SELECT role, content
+            FROM messages
+            WHERE conversation_id = ?
+            ORDER BY id
+            """,
+            (conversation_id,)
+        )
+
+        rows = cur.fetchall()
+        conn.close()
+
+        messages = []
+
+        for role, content in rows:
+            messages.append({
+                "role": role,
+                "content": content
+            })
+
+        return messages

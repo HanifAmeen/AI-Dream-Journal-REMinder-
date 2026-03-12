@@ -5,7 +5,6 @@ import { Routes, Route, useNavigate, useLocation, Navigate } from "react-router-
 import DreamAnalyzer from "./components/Dream_analyzer/DreamAnalyzer";
 import DreamVisualizer from "./components/DreamVisualizer/DreamVisualizer";
 
-
 import LandingPage from "./components/Landing/LandingPage";
 import Login from "./components/Login_and_registration/login";
 import Signup from "./components/Login_and_registration/Signup";
@@ -14,11 +13,12 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Common/Navbar/Navbar";
 import Home from "./components/Home/HomePage";
 
+import ProfilePage from "./components/Profile/profile";   // ⭐ PROFILE IMPORT
+
 import ChatbotButton from "./components/Chatbot/ChatbotButton";
 import ChatbotPanel from "./components/Chatbot/ChatbotPanel";
 
 import Footer from "./components/Common/Footer/footer";
-
 
 import { authHeaders, logout } from "./auth";
 import "./App.css";
@@ -105,62 +105,78 @@ function App() {
   };
 
   return (
-  <>
-    {isStandalone ? (
-      // Standalone pages (no navbar, no footer)
-      <Routes>
-        <Route path="/welcome" element={<LandingPage />} />
-        <Route path="/login" element={<Login onLogin={() => navigate("/home")} />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/" element={<Navigate to="/welcome" />} />
-      </Routes>
-    ) : (
-      // Authenticated layout (one wrapper only!)
-      <div className="App">       {/* THIS is the flex wrapper */}
-        <Navbar />
+    <>
+      {isStandalone ? (
+        // Standalone pages (no navbar, no footer)
+        <Routes>
+          <Route path="/welcome" element={<LandingPage />} />
+          <Route path="/login" element={<Login onLogin={() => navigate("/home")} />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/" element={<Navigate to="/welcome" />} />
+        </Routes>
+      ) : (
+        // Authenticated layout
+        <div className="App">
 
-        <div className="page-wrapper">
-          <Routes>
-            <Route
-              path="/home"
-              element={
-                <ProtectedRoute>
-                  <Home />
-                </ProtectedRoute>
-              }
-            />
+          <Navbar />
 
-            <Route
-              path="/dream-analyzer"
-              element={
-                <ProtectedRoute>
-                  <DreamAnalyzer
-                    dreams={dreams}
-                    onAdd={addDream}
-                    onDelete={deleteDream}
-                    listRef={listRef}
-                  />
-                </ProtectedRoute>
-              }
-            />
+          <div className="page-wrapper">
 
-                            <Route 
-                  path="/visualizer" 
-                  element={
-                    <ProtectedRoute>
-                      <DreamVisualizer />
-                    </ProtectedRoute>
-                  }
-                />
+            <Routes>
 
+              <Route
+                path="/home"
+                element={
+                  <ProtectedRoute>
+                    <Home />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route path="/" element={<Navigate to="/welcome" />} />
-          </Routes>
-        </div>
+              <Route
+                path="/dream-analyzer"
+                element={
+                  <ProtectedRoute>
+                    <DreamAnalyzer
+                      dreams={dreams}
+                      onAdd={addDream}
+                      onDelete={deleteDream}
+                      listRef={listRef}
+                    />
+                  </ProtectedRoute>
+                }
+              />
 
-        <Footer />
-        {/* 👇 Global Chatbot */}
+              <Route
+                path="/visualizer"
+                element={
+                  <ProtectedRoute>
+                    <DreamVisualizer />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* ⭐ PROFILE PAGE */}
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route path="/" element={<Navigate to="/welcome" />} />
+
+            </Routes>
+
+          </div>
+
+          <Footer />
+
+          {/* Global Chatbot */}
           <ChatbotButton />
+
           <ChatbotPanel
             page={
               location.pathname.includes("dream-analyzer")
@@ -168,11 +184,11 @@ function App() {
                 : "home"
             }
           />
-      </div>
-    )}
-  </>
-);
 
+        </div>
+      )}
+    </>
+  );
 }
 
 export default App;

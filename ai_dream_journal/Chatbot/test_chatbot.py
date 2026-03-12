@@ -1,37 +1,22 @@
 from chatbot_engine import ChatbotEngine
-from intents import PageMode
 
 bot = ChatbotEngine()
 
-print(bot.respond(
-    page=PageMode.HOME,
-    user_message="Why do I keep dreaming about falling?"
-))
+# start new conversation
+conversation_id = bot.start_new_conversation()
 
-print(bot.respond(
-    page=PageMode.INPUT,
-    dream_context={
-        "dream_text": "I was running through a dark hallway and couldn’t escape."
-    }
-))
+print("Spectre chatbot test started\n")
 
-print(bot.respond(
-    page=PageMode.ANALYSIS,
-    dream_context={
-        "dream_text": "I was late for an exam and everyone was watching.",
-        "symbols": ["lateness", "exposure", "authority"],
-        "dominant_emotion": "anxiety"
-    }
-))
+while True:
+    
+    user_input = input("You: ")
 
-print(bot.handle_followup_answer(
-    dream_id=1,
-    question="Is there something in waking life you feel unprepared for?",
-    answer="Yes, I have an exam coming up and I feel behind.",
-    dream_context={
-        "dream_text": "I was late for an exam and everyone was watching.",
-        "symbols": ["lateness", "exposure", "authority"],
-        "dominant_emotion": "anxiety"
-    }
-))
+    if user_input.lower() in ["quit", "exit"]:
+        break
 
+    response = bot.respond(
+        user_message=user_input,
+        conversation_id=conversation_id
+    )
+
+    print("Spectre:", response["response"])

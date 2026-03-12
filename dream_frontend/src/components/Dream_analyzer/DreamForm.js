@@ -191,7 +191,7 @@ function DreamForm({ onAdd }) {
             className="dream-button"
             disabled={loading}
           >
-            {loading ? "Saving..." : "Save Dream"}
+            {loading ? "Analyzing..." : "Analyze Dream"}
           </button>
 
           <button
@@ -210,7 +210,7 @@ function DreamForm({ onAdd }) {
             className="dream-button"
             style={{
               background:
-                "linear-gradient(to right, #424242, #212121)",
+                "linear-gradient(to right, #f10c0c, #7c0000)",
             }}
           >
             Clear

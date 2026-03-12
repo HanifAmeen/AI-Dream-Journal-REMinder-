@@ -1,124 +1,105 @@
-from intents import PageMode
-from decision_logic import should_ask_question
-from choose_followup_questions import choose_followup_question
-from followup_memory import FollowUpMemory
-from reflection_builder import build_reflection
 from local_llm import generate_reply
 from conversation_memory import ConversationMemory
 
 
 class ChatbotEngine:
+
     SYSTEM_PROMPT = """
-You are REMinder, a calm dream companion.
+You are Spectre, a calm, insightful, and emotionally intelligent guide who helps people explore and understand their dreams.
 
-STRICT RULES:
-- Never explain your reasoning.
-- Never describe what you are doing.
-- Never mention page modes, system behavior, or conversation structure.
-- Never say phrases like "In this response", "The assistant", or "This aligns with".
-- Speak directly to the user as a human would.
+Your role is to help users reflect on the meaning of their dreams, the emotions within them, and how they might relate to waking life.
 
-STYLE:
-- Be concise: 1–3 short paragraphs maximum.
-- Prefer 2–4 sentences.
-- No lectures. No analysis about analysis.
-- If the user greets you, reply briefly and invite them to share a dream.
+Communication style:
+- Speak naturally, clearly, and warmly.
+- Be thoughtful and reflective rather than overly technical.
+- Keep most responses concise (2–4 sentences), unless the user asks for deeper explanation.
+- Avoid sounding repetitive or robotic.
+
+Structure:
+- If the user asks for explanations, categories, or examples, use numbered lists or bullet points to improve clarity. 
+- When providing numbered lists, stay on topic and complete the list without introducing unrelated content.
+- For dream interpretation, focus on symbols, emotions, and possible psychological themes rather than absolute conclusions.
+
+Conversation behavior:
+- Do NOT end every message with a question.
+- Only ask a question when it genuinely helps the conversation move forward.
+- Sometimes simply acknowledge the user's experience or offer a reflection instead of asking something.
+
+Reasoning approach:
+When discussing dreams, consider:
+• emotions felt in the dream
+• symbols or objects that appear
+• actions or events happening in the dream
+• possible connections to waking life experiences
+
+Safety and honesty:
+- Never present interpretations as absolute truth. Dreams can have multiple meanings.
+- If unsure, say so in a thoughtful way rather than inventing certainty.
+
+Goal:
+Help the user feel understood while guiding them toward deeper reflection about their dreams and inner experiences.
 """
-
 
     def __init__(self):
-        self.memory = FollowUpMemory()
-        self.conversation_memory = ConversationMemory()
+        self.memory = ConversationMemory()
 
-    # ------------------------------
-    # Main entry point
-    # ------------------------------
-    def respond(self, page, user_message=None, dream_context=None):
-        if page == PageMode.HOME:
-            return self._home(user_message)
+    # ---------------------------------
+    # Main chat response
+    # ---------------------------------
+    def respond(self, user_message, conversation_id=None, dream_context=None):
 
-        if page == PageMode.INPUT:
-            return self._input()
+        # Create conversation if needed
+        if not conversation_id:
+            conversation_id = self.memory.start_new_conversation()
 
-        if page == PageMode.ANALYSIS:
-            return self._analysis(dream_context)
+        # Save user message
+        self.memory.add_message(conversation_id, "user", user_message)
 
-        return self._llm_fallback(page, user_message, dream_context)
+        # Load conversation history
+        history = self.memory.get_history(conversation_id)
 
-    # ------------------------------
-    # LLM-powered fallback
-    # ------------------------------
-    def _llm_fallback(self, page, user_message=None, dream_context=None):
-        if user_message:
-            self.conversation_memory.add_user(user_message)
+        # Build context
+        context_parts = []
 
-        context_block = ""
+        if history:
+            context_parts.append("Conversation history:\n" + history)
+
         if dream_context:
-            context_block += f"\nDream context:\n{dream_context}"
+            context_parts.append("Dream context:\n" + str(dream_context))
 
-        full_prompt = f"""
-Conversation so far:
-{self.conversation_memory.render()}
+        context = "\n\n".join(context_parts)
 
-{context_block}
+        prompt = f"""
+{context}
 
-User message:
-{user_message}
+User: {user_message}
+
+Spectre:
 """
 
+        # Generate reply
+        reply = generate_reply(self.SYSTEM_PROMPT, prompt)
 
-        reply = generate_reply(self.SYSTEM_PROMPT, full_prompt)
-        self.conversation_memory.add_bot(reply)
+        # Save bot reply
+        self.memory.add_message(conversation_id, "assistant", reply)
 
         return {
             "type": "answer",
+            "conversation_id": conversation_id,
             "response": reply
         }
 
-    # ------------------------------
-    # Page-specific handlers
-    # ------------------------------
-    def _home(self, user_message):
-        return self._llm_fallback(
-            page=PageMode.HOME,
-            user_message=user_message
-        )
+    # ---------------------------------
+    # Start new chat
+    # ---------------------------------
+    def start_new_conversation(self):
+        return self.memory.start_new_conversation()
 
-    def _input(self):
-        return self._llm_fallback(
-            page=PageMode.INPUT,
-            user_message="The user is preparing to describe a dream."
-        )
+    # ---------------------------------
+    # Get history for frontend
+    # ---------------------------------
+    def get_conversation_history(self, conversation_id):
 
-    def _analysis(self, dream_context):
-        dream_text = dream_context["dream_text"]
-        symbols = dream_context["symbols"]
-        dominant_emotion = dream_context["dominant_emotion"]
+        messages = self.memory.get_messages(conversation_id)
 
-        if should_ask_question(dream_text, symbols, dominant_emotion):
-            return {
-                "type": "question",
-                "response": choose_followup_question(symbols)
-            }
-
-        return self._llm_fallback(
-            page=PageMode.ANALYSIS,
-            user_message="Offer an insight about this dream.",
-            dream_context=dream_context
-        )
-
-    # ------------------------------
-    # Follow-up answer handler
-    # ------------------------------
-    def handle_followup_answer(self, dream_id, question, answer, dream_context):
-        self.memory.store(dream_id, question, answer)
-
-        reflection = build_reflection(
-            dream_context,
-            self.memory.get(dream_id)
-        )
-
-        return {
-            "type": "reflection",
-            "response": reflection
-        }
+        return messages

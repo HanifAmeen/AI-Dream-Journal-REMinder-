@@ -1,0 +1,91 @@
+.profile-container{
+
+  max-width:900px;
+  margin:auto;
+
+  padding:60px 30px;
+
+  color:white;
+}
+
+.profile-title{
+  font-size:2.5rem;
+  margin-bottom:40px;
+  text-align:center;
+}
+
+.profile-form{
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(20px);
+
+  border-radius:20px;
+
+  padding:40px;
+
+  border:1px solid rgba(255,255,255,0.1);
+}
+
+.profile-grid{
+
+  display:grid;
+
+  grid-template-columns:1fr 1fr;
+
+  gap:25px;
+}
+
+.form-group{
+
+  display:flex;
+  flex-direction:column;
+}
+
+.form-group label{
+
+  margin-bottom:6px;
+
+  font-size:0.9rem;
+
+  opacity:0.8;
+}
+
+.form-group input,
+.form-group select{
+
+  padding:12px;
+
+  border-radius:10px;
+
+  border:1px solid rgba(255,255,255,0.15);
+
+  background:rgba(0,0,0,0.3);
+
+  color:white;
+
+  font-size:0.95rem;
+}
+
+.save-profile{
+
+  margin-top:30px;
+
+  padding:14px 24px;
+
+  border:none;
+
+  border-radius:30px;
+
+  background:linear-gradient(45deg,#c892ff,#8e24aa);
+
+  color:white;
+
+  font-size:1rem;
+
+  cursor:pointer;
+
+  width:200px;
+
+  display:block;
+
+  margin-left:auto;
+}

@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from scene_splitter import split_into_scenes
 from prompt_builder import build_prompt
 from image_generator import generate_image
@@ -10,13 +11,16 @@ scenes = split_into_scenes(
     max_scenes=8
 )
 
-output_files = []
-
-for i, scene in enumerate(scenes):
-    is_final = (i == len(scenes) - 1)
+def process_scene(args):
+    i, scene, total = args
+    is_final = (i == total - 1)
     prompt = build_prompt(scene, is_final=is_final)
-    filename = generate_image(prompt, i)
-    output_files.append(filename)
+    return generate_image(prompt, i)
+
+with ThreadPoolExecutor() as executor:
+    output_files = list(
+        executor.map(process_scene, [(i, s, len(scenes)) for i, s in enumerate(scenes)])
+    )
 
 print("\nGenerated images:")
 for f in output_files:

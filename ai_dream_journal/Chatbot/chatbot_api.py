@@ -1,44 +1,60 @@
 from flask import Blueprint, request, jsonify
 from chatbot_engine import ChatbotEngine
-from intents import PageMode
 
 chatbot_bp = Blueprint("chatbot", __name__)
+
+# Initialize chatbot engine once
 bot = ChatbotEngine()
 
 
-def parse_page_mode(page_str):
-    try:
-        return PageMode(page_str)
-    except Exception:
-        return PageMode.HOME
-
-
+# ---------------------------------------
+# Main Chat Endpoint
+# ---------------------------------------
 @chatbot_bp.route("/chatbot/respond", methods=["POST"])
 def chatbot_respond():
+
     data = request.get_json(force=True)
 
-    page = parse_page_mode(data.get("page", "home"))
     user_message = data.get("message")
+    conversation_id = data.get("conversation_id")
     dream_context = data.get("dream_context")
 
+    if not user_message:
+        return jsonify({
+            "error": "No message provided"
+        }), 400
+
     response = bot.respond(
-        page=page,
         user_message=user_message,
+        conversation_id=conversation_id,
         dream_context=dream_context
     )
 
     return jsonify(response)
 
 
-@chatbot_bp.route("/chatbot/followup", methods=["POST"])
-def chatbot_followup():
-    data = request.get_json(force=True)
+# ---------------------------------------
+# Start New Conversation
+# ---------------------------------------
+@chatbot_bp.route("/chatbot/new_chat", methods=["POST"])
+def new_chat():
 
-    response = bot.handle_followup_answer(
-        dream_id=data["dream_id"],
-        question=data["question"],
-        answer=data["answer"],
-        dream_context=data["dream_context"]
-    )
+    conversation_id = bot.start_new_conversation()
 
-    return jsonify(response)
+    return jsonify({
+        "conversation_id": conversation_id
+    })
+
+
+# ---------------------------------------
+# Optional: Get Conversation History
+# ---------------------------------------
+@chatbot_bp.route("/chatbot/history/<conversation_id>", methods=["GET"])
+def get_chat_history(conversation_id):
+
+    history = bot.get_conversation_history(conversation_id)
+
+    return jsonify({
+        "conversation_id": conversation_id,
+        "messages": history
+    })

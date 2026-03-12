@@ -1,25 +1,33 @@
-/* --- Moon Knight Themed Form v2.0 — ENHANCED & RESPONSIVE --- */
+/* --- REMinder Futuristic Form — Blade Runner 2099 Edition --- */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
-/* CSS CUSTOM PROPERTIES for Moon Knight Palette [web:2] */
+/* ============================= */
+/*        COLOR SYSTEM           */
+/* ============================= */
+
 :root {
-  --mk-black: #000000;
   --mk-white: #ffffff;
-  --mk-light-gray: #a7a7a7;
-  --mk-dark-gray: #787878;
-  --mk-marvel-red: #ed2924;
-  
-  --mk-bg-primary: #0a0a0f;
-  --mk-bg-secondary: #1a1a24;
-  --mk-surface: rgba(20, 20, 30, 0.98);
+  --mk-light-gray: #dcdcff;
+  --mk-dark-gray: #8888aa;
+
+  /* Original Purple (kept) */
   --mk-glow-purple: #6a1b9a;
-  --mk-glow-red: #ed2924;
-  --mk-text-primary: #e0e0ff;
-  --mk-text-secondary: #b0b0ff;
-  --mk-border: #6a1b9a;
+
+  /* Blade Runner Atmosphere */
+  --mk-bg-primary: #05050a;
+  --mk-bg-secondary: #0f0f1a;
+  --mk-surface: rgba(255, 255, 255, 0.06);
+
+  --mk-text-primary: #ffffff;
+  --mk-text-secondary: #e5e5ff;
+
+  --mk-border: rgba(106, 27, 154, 0.6);
 }
 
-/* General page styling */
+/* ============================= */
+/*        GLOBAL RESET           */
+/* ============================= */
+
 * {
   box-sizing: border-box;
 }
@@ -28,30 +36,44 @@ body {
   margin: 0;
   padding: 20px;
   font-family: 'Orbitron', monospace;
-  background: linear-gradient(135deg, var(--mk-bg-primary) 0%, var(--mk-bg-secondary) 100%);
+
+  background:
+    radial-gradient(circle at 20% 30%, rgba(106, 27, 154, 0.15), transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(106, 27, 154, 0.1), transparent 40%),
+    linear-gradient(135deg, var(--mk-bg-primary), var(--mk-bg-secondary));
+
   color: var(--mk-text-primary);
   min-height: 100vh;
   line-height: 1.6;
 }
 
-/* RESPONSIVE Container [web:15] */
+/* ============================= */
+/*        MAIN CONTAINER         */
+/* ============================= */
+
 .dream-form-container {
   background: var(--mk-surface);
   padding: clamp(30px, 5vw, 60px);
   border-radius: 20px;
-  box-shadow: 
-    0 0 40px rgba(106, 27, 154, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+  box-shadow:
+    0 0 60px rgba(106, 27, 154, 0.4),
+    0 0 120px rgba(106, 27, 154, 0.2),
+    inset 0 0 20px rgba(255, 255, 255, 0.05);
+
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
   text-align: center;
+
   border: 1px solid var(--mk-border);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px);
+
   position: relative;
   overflow: hidden;
 }
 
+/* Subtle neon top line */
 .dream-form-container::before {
   content: '';
   position: absolute;
@@ -59,60 +81,48 @@ body {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--mk-glow-red), transparent);
+  background: linear-gradient(90deg, transparent, var(--mk-glow-purple), transparent);
   animation: shimmer 3s infinite;
 }
 
-/* Title styling — Moon Knight Bold */
+/* ============================= */
+/*            TITLE              */
+/* ============================= */
+
 .dream-form-title {
   font-size: clamp(24px, 4vw, 36px);
   font-weight: 900;
   margin-bottom: 30px;
-  color: var(--mk-text-secondary);
-  text-shadow: 
-    0 0 20px var(--mk-glow-red),
-    0 0 40px var(--mk-glow-purple);
-  letter-spacing: 2px;
-  position: relative;
+  color: #ffffff;
+  letter-spacing: 3px;
+
+  text-shadow:
+    0 0 10px #ffffff,
+    0 0 25px var(--mk-glow-purple),
+    0 0 50px var(--mk-glow-purple);
 }
 
-.dream-form-title::after {
-  
-  position: absolute;
-  bottom: -20px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 12px;
-  color: var(--mk-marvel-red);
-  opacity: 0.7;
-  font-weight: 700;
-}
+/* ============================= */
+/*            INPUTS             */
+/* ============================= */
 
-/* ENHANCED Inputs [web:8] */
 .dream-input,
 .dream-textarea {
   width: 100%;
   padding: 16px 20px;
   margin-bottom: 20px;
   border-radius: 16px;
-  border: 2px solid rgba(106, 27, 154, 0.3);
+
+  border: 2px solid rgba(255, 255, 255, 0.2);
+
   font-size: 16px;
   font-family: 'Orbitron', monospace;
-  background: rgba(10, 10, 15, 0.8);
-  color: var(--mk-text-primary);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(10px);
-}
 
-.dream-input:focus,
-.dream-textarea:focus {
-  outline: none;
-  border-color: var(--mk-glow-red);
-  box-shadow: 
-    0 0 0 4px rgba(237, 41, 36, 0.2),
-    0 0 20px rgba(237, 41, 36, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+
+  transition: all 0.4s ease;
+  backdrop-filter: blur(12px);
 }
 
 .dream-input::placeholder,
@@ -121,59 +131,64 @@ body {
   opacity: 0.8;
 }
 
-/* Textarea height */
+.dream-input:focus,
+.dream-textarea:focus {
+  outline: none;
+  border-color: var(--mk-glow-purple);
+
+  box-shadow:
+    0 0 0 4px rgba(106, 27, 154, 0.2),
+    0 0 25px rgba(106, 27, 154, 0.6);
+
+  transform: translateY(-2px);
+}
+
+/* Textarea sizing */
 .dream-textarea {
   height: 140px;
   resize: vertical;
   min-height: 120px;
 }
 
-/* ENHANCED Button [web:18] */
+/* ============================= */
+/*            BUTTON             */
+/* ============================= */
+
 .dream-button {
-  background: linear-gradient(45deg, var(--mk-glow-purple), var(--mk-glow-red));
-  color: var(--mk-white);
+  background: #ffffff;
+  color: #000000;
+
   padding: 16px 40px;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 900;
   font-family: 'Orbitron', monospace;
+
   border: none;
   border-radius: 50px;
   cursor: pointer;
-  letter-spacing: 1px;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  letter-spacing: 2px;
   text-transform: uppercase;
+
   min-height: 56px;
-}
 
-.dream-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-  transition: left 0.6s;
-}
+  transition: all 0.4s ease;
 
-.dream-button:hover::before {
-  left: 100%;
+  box-shadow: 0 0 25px rgba(106, 27, 154, 0.6);
 }
 
 .dream-button:hover {
   transform: translateY(-4px);
-  box-shadow: 
-    0 15px 35px rgba(237, 41, 36, 0.4),
-    0 5px 15px rgba(106, 27, 154, 0.3);
+
+  box-shadow:
+    0 0 40px rgba(106, 27, 154, 1),
+    0 0 80px rgba(106, 27, 154, 0.6);
 }
 
 .dream-button:active {
   transform: translateY(-2px);
 }
 
-/* Disabled button state */
 .dream-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -181,31 +196,39 @@ body {
   box-shadow: none;
 }
 
-/* Message styling */
+/* ============================= */
+/*         SUCCESS MESSAGE       */
+/* ============================= */
+
 .dream-message {
   margin-top: 20px;
   padding: 15px 20px;
   border-radius: 12px;
   font-weight: 700;
   font-size: 16px;
-  animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideInUp 0.6s ease;
 }
 
 .success-msg {
-  background: rgba(76, 175, 80, 0.2);
-  color: #4caf50;
-  border: 1px solid rgba(76, 175, 80, 0.4);
+  background: rgba(106, 27, 154, 0.15);
+  color: #ffffff;
+  border: 1px solid rgba(106, 27, 154, 0.5);
 }
 
-/* ENHANCED Loader [web:5] */
+/* ============================= */
+/*            LOADER             */
+/* ============================= */
+
 .loader {
   margin: 20px auto;
   width: 32px;
   height: 32px;
+
   border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top: 3px solid var(--mk-marvel-red);
+  border-top: 3px solid var(--mk-glow-purple);
+
   border-radius: 50%;
-  animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: spin 1s linear infinite;
   position: relative;
 }
 
@@ -214,49 +237,69 @@ body {
   position: absolute;
   top: 50%;
   left: 50%;
+
   width: 12px;
   height: 12px;
-  background: var(--mk-marvel-red);
+
+  background: var(--mk-glow-purple);
   border-radius: 50%;
+
   transform: translate(-50%, -50%);
   animation: pulse 1.5s infinite;
 }
 
-/* Mic Recording — ENHANCED */
+/* ============================= */
+/*        MIC RECORDING          */
+/* ============================= */
+
 @keyframes micPulse {
-  0%, 100% { 
-    box-shadow: 0 0 15px rgba(237, 41, 36, 0.6), 0 0 30px rgba(237, 41, 36, 0.4); 
+  0%, 100% {
+    box-shadow:
+      0 0 15px rgba(106, 27, 154, 0.6),
+      0 0 30px rgba(106, 27, 154, 0.4);
   }
-  50% { 
-    box-shadow: 0 0 30px rgba(237, 41, 36, 1), 0 0 60px rgba(237, 41, 36, 0.6); 
+  50% {
+    box-shadow:
+      0 0 30px rgba(106, 27, 154, 1),
+      0 0 60px rgba(106, 27, 154, 0.6);
   }
 }
 
 .mic-button.recording {
   animation: micPulse 1.2s infinite ease-in-out;
-  background: linear-gradient(45deg, var(--mk-marvel-red), #b71c1c) !important;
-  box-shadow: 0 0 20px rgba(237, 41, 36, 0.6);
+  background: #ffffff !important;
+  color: #000;
+  box-shadow: 0 0 25px rgba(106, 27, 154, 0.8);
   transform: scale(1.05);
 }
 
-/* ANIMATIONS */
+/* ============================= */
+/*           ANIMATIONS          */
+/* ============================= */
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
 @keyframes pulse {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-  50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.7; }
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 0.7;
+  }
 }
 
 @keyframes slideInUp {
-  from { 
-    opacity: 0; 
-    transform: translateY(20px); 
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -265,30 +308,119 @@ body {
   50% { opacity: 1; }
 }
 
-/* RESPONSIVE DESIGN */
+/* ============================= */
+/*          RESPONSIVE           */
+/* ============================= */
+
 @media (max-width: 768px) {
   body { padding: 10px; }
-  
+
   .dream-form-container {
     padding: 25px 20px;
     margin: 10px;
     border-radius: 16px;
   }
-  
+
   .dream-form-title {
     font-size: 24px;
     margin-bottom: 20px;
   }
-  
+
   .dream-button {
     padding: 14px 30px;
     font-size: 15px;
   }
 }
 
-/* High DPI displays */
+/* High DPI refinement */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
   .dream-form-container {
     border-width: 0.5px;
   }
+}
+
+/* ============================= */
+/*      ADVANCED FORM SHAPE      */
+/* ============================= */
+
+.dream-form-container {
+  position: relative;
+  width: 100%;
+  max-width: 620px;
+  margin: 0 auto;
+  padding: clamp(35px, 5vw, 65px);
+
+  background: linear-gradient(
+    145deg,
+    rgba(255,255,255,0.08),
+    rgba(255,255,255,0.03)
+  );
+
+  backdrop-filter: blur(25px);
+
+  /* ANGLED CYBERPUNK SHAPE */
+  clip-path: polygon(
+    0% 40px,
+    40px 0%,
+    100% 0%,
+    100% calc(100% - 40px),
+    calc(100% - 40px) 100%,
+    0% 100%
+  );
+
+  border: 1px solid rgba(106, 27, 154, 0.6);
+
+  box-shadow:
+    0 0 80px rgba(106, 27, 154, 0.35),
+    0 0 140px rgba(106, 27, 154, 0.15),
+    inset 0 0 30px rgba(255,255,255,0.05);
+
+  text-align: center;
+  overflow: hidden;
+}
+
+/* OUTER GLOW FRAME */
+.dream-form-container::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+
+  clip-path: polygon(
+    0% 40px,
+    40px 0%,
+    100% 0%,
+    100% calc(100% - 40px),
+    calc(100% - 40px) 100%,
+    0% 100%
+  );
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(106,27,154,0.8),
+    transparent
+  );
+
+  z-index: -1;
+  filter: blur(8px);
+  opacity: 0.7;
+}
+
+/* INNER LIGHT EDGE */
+.dream-form-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  clip-path: polygon(
+    0% 40px,
+    40px 0%,
+    100% 0%,
+    100% calc(100% - 40px),
+    calc(100% - 40px) 100%,
+    0% 100%
+  );
+
+  border: 1px solid rgba(255,255,255,0.1);
+  pointer-events: none;
 }
