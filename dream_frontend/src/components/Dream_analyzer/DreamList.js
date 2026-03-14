@@ -397,7 +397,7 @@ export default function DreamList({ dreams = [] }) {
                   </div>
                 </div>
 
-                {/* ✅ NEW: METRICS SECTION - Overall Confidence stays the same */}
+                {/* ✅ NEW: METRICS SECTION - Personalization block REMOVED */}
                 <div className="analysis-section">
                   
                     <h4>📊 Metrics</h4>

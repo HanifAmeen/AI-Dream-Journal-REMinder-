@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import "./profile.css";
 
 export default function ProfilePage() {
-
   const storedUser = JSON.parse(localStorage.getItem("user"));
 
   const [profile, setProfile] = useState({
@@ -12,11 +11,36 @@ export default function ProfilePage() {
     age: "",
     nationality: "",
     gender: "",
-    star_sign: ""
+    religion: ""
   });
 
-  // Load base user info
+  // Load base user info + saved profile
   useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const res = await fetch("http://127.0.0.1:5000/get_profile", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        const data = await res.json();
+
+        if (data && Object.keys(data).length > 0) {
+          setProfile(prev => ({
+            ...prev,
+            ...data
+          }));
+        }
+      } catch (err) {
+        console.error("Error loading profile:", err);
+      }
+    };
+
+    // First load stored user info
     if (storedUser) {
       setProfile(prev => ({
         ...prev,
@@ -24,34 +48,78 @@ export default function ProfilePage() {
         email: storedUser.email
       }));
     }
+
+    // Then fetch saved profile from backend
+    fetchProfile();
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setProfile({
+    let updatedProfile = {
       ...profile,
       [name]: value
-    });
+    };
+
+    // If DOB changes → calculate age automatically
+    if (name === "dob" && value) {
+      const birthDate = new Date(value);
+      const today = new Date();
+
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
+        age--;
+      }
+
+      updatedProfile.age = age.toString();
+    }
+
+    setProfile(updatedProfile);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log("Saving profile:", profile);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("No token found. Please login again.");
+        return;
+      }
 
-    // later you will POST this to backend
+      const res = await fetch("http://127.0.0.1:5000/update_profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(profile)
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Profile saved successfully!");
+      } else {
+        alert(`Error: ${data.error || "Failed to save profile"}`);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save profile. Please try again.");
+    }
   };
 
   return (
     <div className="profile-container">
-
       <h1 className="profile-title">Your Profile</h1>
 
       <form className="profile-form" onSubmit={handleSubmit}>
-
         <div className="profile-grid">
-
           <div className="form-group">
             <label>Name</label>
             <input
@@ -86,7 +154,7 @@ export default function ProfilePage() {
               type="number"
               name="age"
               value={profile.age}
-              onChange={handleChange}
+              readOnly
             />
           </div>
 
@@ -116,24 +184,21 @@ export default function ProfilePage() {
           </div>
 
           <div className="form-group">
-            <label>Star Sign (optional)</label>
+            <label>Religion</label>
             <input
               type="text"
-              name="star_sign"
-              value={profile.star_sign}
+              name="religion"
+              value={profile.religion}
               onChange={handleChange}
-              placeholder="Aries, Pisces, etc."
+              
             />
           </div>
-
         </div>
 
-        <button className="save-profile">
+        <button className="save-profile" type="submit">
           Save Profile
         </button>
-
       </form>
-
     </div>
   );
 }

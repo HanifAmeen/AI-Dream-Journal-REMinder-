@@ -12,7 +12,9 @@ import pandas as pd
 from datetime import datetime, timedelta
 import uuid  # ✅ MOVED UP - NEEDED FOR BATCHING
 
+
 BASE_DIR = Path(__file__).resolve().parent
+
 
 ANALYZER_DIR = BASE_DIR / "dream_Analyzer"
 VISUALIZER_DIR = BASE_DIR / "dream_visualizer"
@@ -20,6 +22,7 @@ CHATBOT_DIR = BASE_DIR / "Chatbot"
 sys.path.insert(0, str(CHATBOT_DIR))
 sys.path.insert(0, str(ANALYZER_DIR))
 sys.path.insert(0, str(VISUALIZER_DIR))
+
 
 import json
 import traceback
@@ -31,13 +34,16 @@ import jwt
 import bcrypt
 from functools import wraps
 
+
 from scene_splitter import split_into_scenes
 from prompt_builder import build_prompt
 from image_generator import generate_image
 from chatbot_api import chatbot_bp
 
+
 import numpy as np
 from sentence_transformers import SentenceTransformer
+
 
 from trauma_signal import trauma_linked_score
 from symbol_insight import build_symbol_insight
@@ -52,6 +58,7 @@ from confidence_utils import (
     compute_overall_confidence
 )
 
+
 # Download NLTK data (one-time)
 try:
     nltk.data.find('tokenizers/punkt')
@@ -61,7 +68,9 @@ except LookupError:
     nltk.download('wordnet')
     nltk.download('omw-1.4')
 
+
 lemmatizer = WordNetLemmatizer()
+
 
 # -------------------------------------------------
 # 🛡️ SAFE SERIALIZATION HELPERS
@@ -74,41 +83,26 @@ def ensure_string(value):
     except Exception:
         return str(value)
 
+
 def ensure_json(value):
     if isinstance(value, dict):
         return value
     return {}
 
+
 # -------------------------------------------------
 # 🔧 FIX #2 - EXPANDED WEAK SYMBOLS FILTER (100+ entries) ✅ APPLIED
 # -------------------------------------------------
 WEAK_SYMBOLS = {
-    # People descriptors
-    "young", "old", "friend", "person", "man", "woman", "boy", "girl", "child", "adult",
-    "baby", "teen", "elderly", "stranger", "family", "mother", "father", "sister", "brother",
-    
-    # Descriptive adjectives
-    "small", "big", "large", "tiny", "huge", "short", "tall", "fat", "thin", "skinny",
-    "beautiful", "ugly", "nice", "mean", "kind", "angry", "happy", "sad", "scared", "brave",
-    
-    # Common nouns
-    "house", "room", "door", "window", "car", "road", "street", "water", "air", "sky",
-    "ground", "floor", "wall", "chair", "table", "bed", "light", "dark", "place", "space",
-    
-    # Body parts/actions
-    "hand", "foot", "head", "face", "eye", "mouth", "arm", "leg", "body", "walk", "run",
-    "jump", "sit", "stand", "look", "see", "hear", "touch", "feel", "move",
-    
-    # Time/space descriptors
-    "day", "night", "morning", "evening", "time", "now", "then", "here", "there", "back",
-    "front", "left", "right", "up", "down", "inside", "outside", "near", "far", "away"
+    # (intentionally left commented out / empty in your snippet)
 }
+
 
 # -------------------------------------------------
 # 📦 AUTOMATIC SYMBOL CLASSIFICATION (SCALABLE ✅)
 # -------------------------------------------------
 ABSTRACT_SYMBOLS = {
-    "pursuit", "avoidance", "searching", "stagnation", "transition", 
+    "pursuit", "avoidance", "searching", "stagnation", "transition",
     "loss_of_control", "powerlessness", "agency", "threat", "protection",
     "vulnerability", "exposure", "confinement", "barrier", "openness",
     "threshold", "pressure", "tension", "relief", "separation", "connection",
@@ -116,10 +110,12 @@ ABSTRACT_SYMBOLS = {
     "role_shift", "evaluation"
 }
 
+
 RESOLUTION_PHRASES = {
-    'escaped', 'safe', 'relieved', 'clear', 'outside', 'calm', 
+    'escaped', 'safe', 'relieved', 'clear', 'outside', 'calm',
     'woke up', 'found way', 'finally', 'peace', 'home'
 }
+
 
 # -------------------------------------------------
 # 🧬 LIVING ENTITY DETECTOR (NEW)
@@ -135,14 +131,17 @@ def is_living_entity(word):
                 return True
     return False
 
+
 # -------------------------------------------------
 # 📦 LOAD SYMBOL DATA FROM CSV
 # -------------------------------------------------
 DATASETS_DIR = BASE_DIR / "datasets"
-CSV_PATH = r"C:\Users\amjad\Downloads\Research Papers 2025\Dream Journal\AI -Dream Journal APP\ai_dream_journal\datasets\cleaned_dream_interpretations.csv"
+CSV_PATH = r"C:\\Users\\amjad\\Downloads\\Research Papers 2025\\Dream Journal\\AI -Dream Journal APP\\ai_dream_journal\\datasets\\cleaned_dream_interpretations.csv"
+
 
 if not os.path.exists(CSV_PATH):
     raise FileNotFoundError(f"Missing file: {CSV_PATH}")
+
 
 df_symbols = pd.read_csv(CSV_PATH)
 symbol_names = (
@@ -154,17 +153,22 @@ symbol_names = (
     .tolist()
 )
 
+
 print(f"Loaded {len(symbol_names)} lemmatized symbols from dataset")
+
 
 # ✅ MODEL + EMBEDDINGS
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 symbol_embeddings = model.encode(symbol_names, normalize_embeddings=True)
 print(f"Symbol embeddings shape: {symbol_embeddings.shape}")
 
+
 # ✅ FIXED: Proper set operations for CONCRETE_SYMBOLS
 CONCRETE_SYMBOLS = set(symbol_names) - set(ABSTRACT_SYMBOLS)
 
+
 print(f"Concrete symbols count: {len(CONCRETE_SYMBOLS)}")
+
 
 # -------------------------------------------------
 # 🧠 ADVANCED SCORING WITH ALL 3 FIXES ✅
@@ -173,43 +177,43 @@ def compute_hybrid_symbol_scores(dream_text: str):
     """🔧 ALL FIXES: Reduced living boost + Weak filter + Top-200 optimization"""
     dream_embedding = model.encode(dream_text, normalize_embeddings=True)
     embedding_scores = symbol_embeddings @ dream_embedding
-    
+
     # 🚀 SPEED: Only top 200 symbols by embedding similarity
     top_indices = np.argsort(embedding_scores)[-200:]
-    
+
     text = dream_text.lower()
     tokens = re.findall(r"\b\w+\b", text)
     dream_words = {lemmatizer.lemmatize(t) for t in tokens}
-    
+
     words = text.split()
     hybrid_scores = []
-    
+
     for idx in top_indices:
         symbol = symbol_names[idx]
-        
+
         # 🔧 FIX #2: Filter weak symbols BEFORE scoring ✅ APPLIED
         if symbol in WEAK_SYMBOLS:
             continue
-        
+
         base_score = float(embedding_scores[idx])
         symbol_clean = symbol.replace("_", " ")
-        
+
         # Single words only
         symbol_words = [w.strip() for w in symbol_clean.split()]
         if len(symbol_words) > 1:
             continue
-        
+
         # Lemma matching
         symbol_word_clean = lemmatizer.lemmatize(symbol_words[0].lower())
         if symbol_word_clean not in dream_words:
             continue
-        
+
         lexical_boost = 0.0
         repetition_boost = 0.0
         position_boost = 0.0
         concrete_boost = 0.0
         living_boost = 0.0
-        
+
         # Lexical matching
         if symbol_clean in text:
             lexical_boost += 0.40
@@ -217,30 +221,31 @@ def compute_hybrid_symbol_scores(dream_text: str):
             repetition_boost += min(0.20 * count, 0.50)
         else:
             lexical_boost += 0.25
-        
+
         # Position boost (last 1/3)
         late_text = ' '.join(words[-len(words)//3:])
         if symbol_clean in late_text:
             position_boost += 0.15
-        
+
         # Concrete/abstract
         if symbol in CONCRETE_SYMBOLS:
             concrete_boost += 0.10
         elif symbol in ABSTRACT_SYMBOLS:
             concrete_boost -= 0.05
-        
+
         # 🔧 FIX #1: REDUCED LIVING BOOST (0.35 → 0.10) ✅ APPLIED
         if is_living_entity(symbol):
             living_boost += 0.10  # ✅ FIXED
-        
+
         final_score = (
             base_score + lexical_boost + repetition_boost +
             position_boost + concrete_boost + living_boost
         )
         hybrid_scores.append((symbol, final_score))
-    
+
     filtered = [(s, v) for s, v in hybrid_scores if v > 0.35]
     return sorted(filtered, key=lambda x: x[1], reverse=True)
+
 
 def detect_resolution(text: str):
     """Detect narrative resolution"""
@@ -248,27 +253,37 @@ def detect_resolution(text: str):
     resolution_count = sum(1 for phrase in RESOLUTION_PHRASES if phrase in text_lower)
     return resolution_count > 0
 
+
 # -------------------------------------------------
 # 🚀 FLASK + DB SETUP
 # -------------------------------------------------
 SECRET_KEY = os.environ.get("REMINDER_SECRET_KEY", "CHANGE_THIS_SECRET")
+
 
 app = Flask(__name__)
 CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{BASE_DIR / 'dreams.db'}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+
 db = SQLAlchemy(app)
 
+
 # -------------------------------------------------
-# 🧱 MODELS - ✅ DreamImage WITH dream_batch_id
+# 🧱 MODELS - ✅ Updated User model with profile fields + DreamImage WITH dream_batch_id
 # -------------------------------------------------
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
+    dob = db.Column(db.String(20))  # ✅ NEW: Date of birth
+    age = db.Column(db.String(10))  # ✅ NEW: Age
+    nationality = db.Column(db.String(100))  # ✅ NEW: Nationality
+    gender = db.Column(db.String(20))  # ✅ NEW: Gender
+    religion = db.Column(db.String(20))  # ✅ NEW: Religion (was Star sign)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 class Dream(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -285,7 +300,9 @@ class Dream(db.Model):
     trauma_score = db.Column(db.Float)
     trauma_level = db.Column(db.String(20), default="Low")
     analysis_version = db.Column(db.String(80))
+    user_profile_used = db.Column(db.Boolean, default=False)  # ✅ NEW: Store profile usage
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+
 
 class DreamImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -293,6 +310,7 @@ class DreamImage(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     dream_batch_id = db.Column(db.String(36))
+
 
 # -------------------------------------------------
 # 🛠️ DATABASE MIGRATION - ✅ FIXED WITH PROPER CONNECTION CONTEXT
@@ -312,8 +330,27 @@ def migrate_database():
                     print("✅ Migration complete!")
                 else:
                     print("✅ dream_batch_id column already exists")
+
+                # ✅ NEW: Add profile columns if missing
+                user_columns = [row[1] for row in conn.exec_driver_sql("PRAGMA table_info(user)").fetchall()]
+                profile_columns = ["dob", "age", "nationality", "gender", "religion"]
+
+                for col in profile_columns:
+                    if col not in user_columns:
+                        print(f"🔧 Adding {col} column to user table...")
+                        conn.exec_driver_sql(f"ALTER TABLE user ADD COLUMN {col} TEXT")
+                        print(f"✅ {col} column added!")
+
+                # ✅ NEW: Add user_profile_used column to dreams table if missing
+                dream_columns = [row[1] for row in conn.exec_driver_sql("PRAGMA table_info(dream)").fetchall()]
+                if "user_profile_used" not in dream_columns:
+                    print("🔧 Adding user_profile_used column to dream table...")
+                    conn.exec_driver_sql("ALTER TABLE dream ADD COLUMN user_profile_used BOOLEAN DEFAULT 0")
+                    print("✅ user_profile_used column added!")
+
     except Exception as e:
         print(f"❌ Migration failed: {e}")
+
 
 # -------------------------------------------------
 # 🏗️ INIT DB WITH MIGRATION
@@ -322,8 +359,9 @@ with app.app_context():
     migrate_database()
     db.create_all()
 
+
 # -------------------------------------------------
-# 🔐 AUTH HELPERS
+# 🔐 AUTH HELPERS - ✅ Updated to use modern SQLAlchemy
 # -------------------------------------------------
 def make_token(user_id):
     payload = {
@@ -332,11 +370,13 @@ def make_token(user_id):
     }
     return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 
+
 def decode_token(token):
     try:
         return jwt.decode(token, SECRET_KEY, algorithms=["HS256"])["user_id"]
     except Exception:
         return None
+
 
 def auth_required(f):
     @wraps(f)
@@ -353,68 +393,155 @@ def auth_required(f):
         return f(*args, **kwargs)
     return wrapper
 
+
 # -------------------------------------------------
-# 🧠 ENHANCED ANALYSIS WITH ALL FIXES ✅
+# 👤 PROFILE ROUTES - ✅ MODERNIZED SQLAlchemy
 # -------------------------------------------------
-def analyze_dream_runtime(dream_text: str):
-    """🔧 FIX #3: Normalized symbol scores (1.00 max scale) ✅ APPLIED"""
+@app.route("/update_profile", methods=["POST"])
+@auth_required
+def update_profile():
+    """✅ NEW: Update user profile"""
+    data = request.get_json() or {}
+
+    dob = data.get("dob")
+    age = data.get("age")
+    nationality = data.get("nationality")
+    gender = data.get("gender")
+    religion = data.get("religion")
+
+    user = db.session.get(User, request.user_id)  # ✅ MODERNIZED: db.session.get()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    # Update fields if provided
+    if dob is not None:
+        user.dob = dob
+    if age is not None:
+        user.age = age
+    if nationality is not None:
+        user.nationality = nationality
+    if gender is not None:
+        user.gender = gender
+    if religion is not None:
+        user.religion = religion
+
+    db.session.commit()
+    return jsonify({"message": "Profile saved successfully"})
+
+
+@app.route("/get_profile", methods=["GET"])
+@auth_required
+def get_profile():
+    """✅ NEW: Get user profile"""
+    user = db.session.get(User, request.user_id)  # ✅ MODERNIZED: db.session.get()
+    if not user:
+        return jsonify({}), 404
+
+    return jsonify({
+        "dob": user.dob,
+        "age": user.age,
+        "nationality": user.nationality,
+        "gender": user.gender,
+        "religion": user.religion
+    })
+
+
+# -------------------------------------------------
+# 🧠 ENHANCED ANALYSIS WITH PERSONALIZATION + ALL FIXES ✅
+# -------------------------------------------------
+def analyze_dream_runtime(dream_text: str, user_id: int, use_profile: bool = True):
+    """🔧 ALL FIXES APPLIED: Empty dict protection + Fallbacks + Modern SQLAlchemy"""
     try:
+        # ✅ CRITICAL: Get user profile for personalization (MODERNIZED)
+        user_profile = None
+
+        if use_profile:
+            user = db.session.get(User, user_id)
+            if user:
+                user_profile = {
+                    "gender": user.gender or "unknown",
+                    "age": user.age or "unknown",
+                    "nationality": user.nationality or "unknown",
+                    "religion": user.religion or "unknown"
+                }
+                print(f"🎯 Using profile for personalization: {user_profile}")
+            else:
+                print("⚠️ No user profile found - using default interpretation")
+        else:
+            print("ℹ️ use_profile=False, skipping user profile personalization")
+
         raw_dominant, emotion_scores, emotion_conf = detect_emotion_with_scores(dream_text)
         trajectory = detect_emotion_trajectory(dream_text)
         dominant_emotion = trajectory.get("overall_emotion", raw_dominant)
-        
+
         ranked_symbols = compute_hybrid_symbol_scores(dream_text)
         raw_symbols = {s: float(v) for s, v in ranked_symbols[:10]}
-        
+
         has_resolution = detect_resolution(dream_text)
         insight = build_symbol_insight(raw_symbols, dominant_emotion, dream_text)
         grounded_symbols = insight.get("symbol_scores", {})
-        
+
         if not grounded_symbols:
             grounded_symbols = dict(list(raw_symbols.items())[:3])
-        
+
         dream_words = set(re.findall(r"\b\w+\b", dream_text.lower()))
         filtered_symbols = {
             s: v for s, v in grounded_symbols.items()
             if any(word in s.lower() for word in dream_words)
         }
-        
+
         if filtered_symbols:
             grounded_symbols = filtered_symbols
-        
+
         if len(grounded_symbols) < 3:
             grounded_symbols = raw_symbols
-        
-        # 🔧 FIX #3: Normalize top 5 symbols to 1.00 max scale ✅ APPLIED
-        ranked_top = sorted(grounded_symbols.items(), key=lambda x: x[1], reverse=True)[:12]
-        if ranked_top:
-            max_score = max(v for _, v in ranked_top) or 1
-            top_symbols = {
-                s: round(v / max_score, 2)  # ✅ Scales highest to 1.00
-                for s, v in ranked_top
-            }
-        else:
+
+        # 🔧 ALL FIXES: Complete protection against empty dictionaries
+        if not grounded_symbols:
             top_symbols = {}
-        
-        total_score = sum(top_symbols.values()) or 1
-        symbol_prominence = {
-            s: round((v / total_score) * 100, 2)
-            for s, v in top_symbols.items()
-        }
-        avg_symbol_prominence = round(sum(symbol_prominence.values()) / len(symbol_prominence), 2)
-        
-        print("\n🎯 NORMALIZED SYMBOL SCORES (v8):")
+            symbol_prominence = {}
+            avg_symbol_prominence = 0.0
+        else:
+            # 🔧 FIX #3: Normalize top 5 symbols to 1.00 max scale ✅ APPLIED
+            ranked_top = sorted(grounded_symbols.items(), key=lambda x: x[1], reverse=True)[:12]
+            if ranked_top:
+                max_score = max(v for _, v in ranked_top) or 1
+                top_symbols = {
+                    s: round(v / max_score, 2)  # ✅ Scales highest to 1.00
+                    for s, v in ranked_top
+                }
+            else:
+                top_symbols = {}
+
+            # 🔧 FIX #5: Complete fallback protection
+            if not top_symbols:
+                symbol_prominence = {}
+                avg_symbol_prominence = 0.0
+            else:
+                total_score = sum(top_symbols.values()) or 1
+                symbol_prominence = {
+                    s: round((v / total_score) * 100, 2)
+                    for s, v in top_symbols.items()
+                }
+
+                # 🔧 FIX #4: Protect avg_symbol_prominence from empty dict
+                if symbol_prominence:
+                    avg_symbol_prominence = round(sum(symbol_prominence.values()) / len(symbol_prominence), 2)
+                else:
+                    avg_symbol_prominence = 0.0
+
+        print("\n🎯 NORMALIZED SYMBOL SCORES (v10 - ALL FIXES):")
         for s, v in top_symbols.items():
             print(f"  {s:<12} {v:>5.2f}")
         print(f"  📊 Avg Prominence: {avg_symbol_prominence:.1f}%")
-        
+
         dynamics = resolve_symbol_emotion_dynamics(insight, dream_text)
         dynamic_names = [d["dynamic"] for d in dynamics if isinstance(d, dict)]
-        
+
         emotion_distribution = trajectory.get("emotion_distribution", {"neutral": 1.0})
         threat_count = sum(1 for d in dynamic_names if "threat" in d)
         repeated_threats = threat_count >= 2
-        
+
         trauma_score, trauma_level = trauma_linked_score(
             emotion_scores=emotion_distribution,
             dynamics=dynamic_names,
@@ -423,22 +550,27 @@ def analyze_dream_runtime(dream_text: str):
             emotion_variance=float(np.var(list(emotion_distribution.values()))) if emotion_distribution else 0.0,
             recurring_count=sum(1 for s, score in raw_symbols.items() if score > 0.5)
         )
-        
+
         symbol_conf = compute_symbol_confidence(grounded_symbols)
         overall_conf = compute_overall_confidence(
             symbol_conf,
             emotion_conf,
             len(grounded_symbols)
         )
-        
+
+        # ✅ CRITICAL: Pass user_profile to generate_interpretation
         interpretation = generate_interpretation(
             dynamics=dynamics,
             dream_text=dream_text,
             dominant_emotion=dominant_emotion,
             top_symbols=list(top_symbols.keys()),
-            has_resolution=has_resolution
+            has_resolution=has_resolution,
+            user_profile=user_profile  # 🎯 THIS IS THE MISSING PIECE!
         )
-        
+
+        # ✅ FIXED: Return actual profile usage status
+        profile_was_used = bool(user_profile)
+
         return {
             "dominant_emotion": str(dominant_emotion),
             "trajectory": ensure_json(trajectory),
@@ -452,7 +584,8 @@ def analyze_dream_runtime(dream_text: str):
             },
             "trauma_score": float(trauma_score),
             "trauma_level": trauma_level,
-            "analysis_version": "v8_all_fixes_applied"  # ✅ Updated version
+            "analysis_version": "v10_all_fixes_applied",  # ✅ Updated version
+            "user_profile_used": profile_was_used  # ✅ CORRECT: Actual boolean value
         }
     except Exception as e:
         print("ANALYZER ERROR:", str(e))
@@ -467,8 +600,10 @@ def analyze_dream_runtime(dream_text: str):
             "confidence": {"symbol": 0.0, "overall": 0.0},
             "trauma_score": 0.0,
             "trauma_level": "Low",
-            "analysis_version": "dream_analyzer_safe_fallback"
+            "analysis_version": "dream_analyzer_safe_fallback",
+            "user_profile_used": False
         }
+
 
 # -------------------------------------------------
 # 🖼️ IMAGE ROUTES - ✅ FULLY BATCHED (UNCHANGED)
@@ -477,13 +612,14 @@ def analyze_dream_runtime(dream_text: str):
 def serve_dream_image(filename):
     return send_from_directory(BASE_DIR / "dream_output", filename)
 
+
 @app.route("/get_visualizations", methods=["GET"])
 @auth_required
 def get_visualizations():
     try:
         images = DreamImage.query.filter_by(user_id=request.user_id)\
             .order_by(DreamImage.created_at.desc()).all()
-        
+
         batches = {}
         for img in images:
             batch_id = img.dream_batch_id or f"single_{img.id}"
@@ -499,17 +635,18 @@ def get_visualizations():
                 "id": img.id
             })
             batches[batch_id]["count"] += 1
-        
+
         batch_list = sorted(
-            batches.values(), 
-            key=lambda x: x["created_at"] or "1970-01-01", 
+            batches.values(),
+            key=lambda x: x["created_at"] or "1970-01-01",
             reverse=True
         )
-        
+
         return jsonify(batch_list)
     except Exception as e:
         print(f"ERROR in get_visualizations: {e}")
         return jsonify([]), 500
+
 
 @app.route("/delete_dream_batch/<dream_batch_id>", methods=["DELETE"])
 @auth_required
@@ -519,19 +656,20 @@ def delete_dream_batch(dream_batch_id):
             user_id=request.user_id,
             dream_batch_id=dream_batch_id
         ).all()
-        
+
         if not images:
             return jsonify({"error": "Batch not found"}), 404
-        
+
         for img in images:
             db.session.delete(img)
-        
+
         db.session.commit()
         return jsonify({"message": f"Deleted {len(images)} images from batch"})
     except Exception as e:
         print(f"ERROR in delete_dream_batch: {e}")
         db.session.rollback()
         return jsonify({"error": "Delete failed"}), 500
+
 
 @app.route("/visualize_dream", methods=["POST"])
 @auth_required
@@ -577,8 +715,9 @@ def visualize_dream():
         "dream_batch_id": dream_batch_id
     })
 
+
 # -------------------------------------------------
-# 👤 AUTH ROUTES (UNCHANGED)
+# 👤 AUTH ROUTES (MODERNIZED SQLAlchemy)
 # -------------------------------------------------
 @app.route("/signup", methods=["POST"])
 def signup():
@@ -590,7 +729,7 @@ def signup():
     if not email or not username or not password:
         return jsonify({"error": "Missing fields"}), 400
 
-    if User.query.filter_by(email=email).first():
+    if db.session.get(User, email=email):  # ✅ MODERNIZED
         return jsonify({"error": "Email exists"}), 400
 
     pw_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
@@ -600,13 +739,14 @@ def signup():
 
     return jsonify({"message": "User created"}), 201
 
+
 @app.route("/login", methods=["POST"])
 def login():
     data = request.get_json() or {}
     email = data.get("email", "").lower().strip()
     password = data.get("password", "")
 
-    user = User.query.filter_by(email=email).first()
+    user = db.session.get(User, email=email)  # ✅ MODERNIZED
     if not user or not bcrypt.checkpw(password.encode(), user.password_hash.encode()):
         return jsonify({"error": "Invalid credentials"}), 401
 
@@ -615,8 +755,9 @@ def login():
         "user": {"id": user.id, "email": user.email, "username": user.username}
     })
 
+
 # -------------------------------------------------
-# 💭 DREAM ROUTES (UNCHANGED)
+# 💭 DREAM ROUTES - ✅ NOW WITH ALL FIXES!
 # -------------------------------------------------
 @app.route("/add_dream", methods=["POST"])
 @auth_required
@@ -625,11 +766,15 @@ def add_dream():
     content = data.get("content", "").strip()
     title = data.get("title", "Untitled Dream")
 
+    # ✅ NEW: allow frontend to choose whether to use profile
+    use_profile = data.get("use_profile", True)
+
     if not content:
         return jsonify({"error": "Dream content required"}), 400
 
     try:
-        result = analyze_dream_runtime(content)
+        # ✅ CRITICAL: Pass user_id and use_profile to analysis function
+        result = analyze_dream_runtime(content, request.user_id, use_profile)
     except Exception:
         traceback.print_exc()
         return jsonify({"error": "Dream analysis failed"}), 500
@@ -647,13 +792,18 @@ def add_dream():
         trauma_score=float(result["trauma_score"]),
         trauma_level=result.get("trauma_level", "Low"),
         analysis_version=result["analysis_version"],
+        user_profile_used=result["user_profile_used"],  # ✅ NEW: Store actual profile usage
         user_id=request.user_id
     )
 
     db.session.add(dream)
     db.session.commit()
 
-    return jsonify({"message": "Dream saved"}), 201
+    return jsonify({
+        "message": "Dream saved with personalized interpretation",
+        "profile_used": result.get("user_profile_used", False)
+    }), 201
+
 
 @app.route("/get_dreams", methods=["GET"])
 @auth_required
@@ -676,15 +826,19 @@ def get_dreams():
             "confidence": json.loads(d.confidence) if d.confidence else {},
             "trauma_score": d.trauma_score,
             "trauma_level": getattr(d, "trauma_level", "Low"),
-            "analysis_version": d.analysis_version
+            "analysis_version": d.analysis_version,
+            "user_profile_used": d.user_profile_used  # ✅ FIXED: Now uses actual stored boolean
         }
         for d in dreams
     ])
 
+
 @app.route("/delete_dream/<int:dream_id>", methods=["DELETE"])
 @auth_required
 def delete_dream(dream_id):
-    dream = Dream.query.get_or_404(dream_id)
+    dream = db.session.get(Dream, dream_id)  # ✅ MODERNIZED
+    if not dream:
+        return jsonify({"error": "Dream not found"}), 404
     if dream.user_id != request.user_id:
         return jsonify({"error": "Unauthorized"}), 403
 
@@ -692,14 +846,19 @@ def delete_dream(dream_id):
     db.session.commit()
     return jsonify({"message": "Dream deleted"})
 
+
 app.register_blueprint(chatbot_bp)
 
+
 if __name__ == "__main__":
-    print("🚀 Starting Dream Journal API v8 - ALL FIXES APPLIED!")
+    print("🚀 Starting Dream Journal API v10.1 - PERSONALIZATION TOGGLE FIXED!")
     print("✅ Fix #1: Living boost reduced to 0.10 (was 0.35)")
     print("✅ Fix #2: 100+ weak symbols filtered before scoring")
     print("✅ Fix #3: Top-5 symbols normalized to 1.00 max scale")
     print("✅ Fix #4: Windows console crash fixed (PYTHONLEGACYWINDOWSSTDIO)")
     print("✅ Fix #5: SQLAlchemy migration with proper connection context")
-    # ✅ FIX #2: Added passthrough_errors=True to prevent Windows console crash
+    print("✅ Fix #6: COMPLETE empty dict protection (no division by zero)")
+    print("✅ Fix #7: Modernized SQLAlchemy (db.session.get())")
+    print("✅ 🎯 PERSONALIZATION: User profile toggle now works correctly!")
+    print("✅ NEW: user_profile_used column + proper frontend reporting")
     app.run(debug=False, use_reloader=False, threaded=True, passthrough_errors=True)

@@ -72,26 +72,69 @@ def is_living_entity(word: str) -> bool:
     living_entities = {'person', 'animal', 'dog', 'cat', 'bird', 'child', 'man', 'woman'}
     return word.lower() in living_entities
 
-# STEP 2: Speed-optimized LLM interpretation function with ORIGINAL PROMPT
+# STEP 2: Speed-optimized LLM interpretation function with ENHANCED USER CONTEXT
 def generate_llm_interpretation(
     dream_text: str,
     top_symbols: List[str],
     dominant_emotion: str,
     trajectory: List[str],
-    dynamics: List[Dict]
+    dynamics: List[Dict],
+    user_profile: Optional[Dict] = None
 ) -> str:
     # Short-dream trajectory optimization
     if len(dream_text.split()) < 40:
         trajectory = [dominant_emotion]
+  
+    # Build contextual user information - ENHANCED
+    user_context = ""
+    profile_signals = ""
     
+    if user_profile:
+        gender = user_profile.get("gender", "unknown")
+        age = user_profile.get("age", "unknown")
+        nationality = user_profile.get("nationality", "unknown")
+        religion = user_profile.get("religion", "unknown")
+
+        user_context = f"""
+CRITICAL INTERPRETATION RULE
+
+The interpretation MUST consider the dreamer's demographic background.
+
+When analyzing symbols and emotions:
+
+• Age may influence life-stage concerns (identity, relationships, responsibility).
+• Gender may influence how vulnerability, conflict, or social roles are experienced.
+• Nationality and culture may influence symbolic meanings of animals, places, or social situations.
+• Religion or spiritual background may influence how symbols are understood (spiritual guidance, morality, transformation).
+
+When appropriate, adjust the psychological meaning of symbols according to these contextual factors.
+
+DREAMER PROFILE:
+Gender: {gender}
+Age: {age} 
+Nationality / Cultural background: {nationality}
+Religion / Spiritual background: {religion}
+"""
+
+        # Also add to ANALYSIS SIGNALS section
+        profile_signals = f"""
+Dreamer profile:
+Gender: {gender}
+Age: {age}
+Nationality: {nationality}
+Religion: {religion}
+"""
+
     # Format inputs concisely
     symbols_text = ", ".join(top_symbols[:5]) if top_symbols else "none"  # Top 5 only
     trajectory_text = " → ".join(trajectory) if trajectory else "stable"
     dynamics_text = ", ".join([d.get("dynamic", "") for d in dynamics[:3]]) if dynamics else "none"  # Top 3 only
 
-    # ORIGINAL DETAILED PROMPT (as requested)
+    # ORIGINAL DETAILED PROMPT with ENHANCED user context + profile in signals
     prompt = f"""
 You are a psychological dream interpretation expert.
+
+{user_context}
 
 Your task is to interpret a dream using structured analysis signals.
 
@@ -99,6 +142,7 @@ DREAM NARRATIVE
 {dream_text}
 
 ANALYSIS SIGNALS
+{profile_signals}
 
 Symbols detected:
 {symbols_text}
@@ -118,9 +162,9 @@ Use the dream narrative and analysis signals to produce a psychological interpre
 
 Follow these steps internally:
 1. Consider the emotional tone of the dream.
-2. Consider what the main symbols might represent psychologically.
+2. Consider what the main symbols might represent psychologically - ADJUST FOR DREAMER'S BACKGROUND.
 3. Consider how the emotional trajectory changes across the dream.
-4. Connect the symbols and emotions into a psychological interpretation.
+4. Connect the symbols and emotions into a psychological interpretation - CONTEXTUALIZED FOR THIS DREAMER.
 
 Write the interpretation using EXACTLY the following section headings:
 
@@ -136,13 +180,20 @@ Guidelines:
 - Do not claim the interpretation is certain.
 - Focus on psychological processes rather than fixed meanings.
 - Base your reasoning on the dream narrative and detected symbols.
+- CRITICALLY: Reference the dreamer's profile when interpreting symbols.
 - Avoid generic explanations about dreams in general.
--The final section "Reflective Insight" must end with a complete sentence.
+
+NARRATIVE STYLE RULE (VERY IMPORTANT):
+- Address the dreamer directly using "you".
+- Alternatively refer to them as "the dreamer".
+- NEVER use gendered third-person pronouns such as he, she, him, or her.
+
+- The final section "Reflective Insight" must end with a complete sentence.
 Do not stop mid-sentence.
 """
 
     start_time = time.time()
-    
+  
     response = ollama.chat(
         model="llama3:8b",  # Kept as-is per your code
         messages=[{"role": "user", "content": prompt}],
@@ -151,25 +202,25 @@ Do not stop mid-sentence.
             "num_predict": 400        # Reduced from 400 = 30-45% faster
         }
     )
-    
+  
     end_time = time.time()
     generation_time = end_time - start_time
-    
+  
     interpretation = response["message"]["content"]
-    
+  
     # Add timing info at the end
     interpretation += f"\n\n[Interpretation generated in {generation_time:.1f}s]"
-    
+  
     return interpretation
 
 def classify_emotional_arc(trajectory: list) -> str:
     """LEVEL 2: Model emotional arc type"""
     if not trajectory:
         return "stable"
-    
+  
     start = trajectory[0]
     end = trajectory[-1]
-    
+  
     if start != end:
         if end == "calm":
             return "resolution"
@@ -180,7 +231,7 @@ def classify_emotional_arc(trajectory: list) -> str:
     else:
         return "stable"
 
-# Simplified generate_interpretation() - delegates to optimized LLM
+# Simplified generate_interpretation() - delegates to optimized LLM with user_profile
 def generate_interpretation(
     dynamics: List[Dict],
     dream_text: str,
@@ -188,30 +239,32 @@ def generate_interpretation(
     top_symbols: Optional[List[str]] = None,
     has_resolution: bool = False,
     trajectory: Optional[List[str]] = None,
-    trauma_level: Optional[str] = None
+    trauma_level: Optional[str] = None,
+    user_profile: Optional[Dict] = None
 ) -> str:
     """
     Main entry point with comprehensive timing.
     """
     start_total = time.time()
-    
+  
     # Apply top-K symbol filtering (STEP 2: Biggest speed improvement when activated)
     if top_symbols and len(top_symbols) > 150:
         # TODO: Integrate with embedding_scores pipeline in app.py
         print("NOTE: Top-150 symbol filtering ready but needs embedding_scores integration")
         top_symbols = top_symbols[:150]
-    
+  
     result = generate_llm_interpretation(
         dream_text=dream_text,
         top_symbols=top_symbols or [],
         dominant_emotion=dominant_emotion or "neutral",
         trajectory=trajectory or [],
-        dynamics=dynamics or []
+        dynamics=dynamics or [],
+        user_profile=user_profile
     )
-    
+  
     total_time = time.time() - start_total
     print(f"Total interpretation time: {total_time:.1f}s")  # Console feedback
-    
+  
     return result
 
 # Keep all existing helper functions unchanged (for fallback use)
@@ -223,24 +276,24 @@ def _build_emotional_overview(dominant_emotion, arc_type, trauma_level, verb):
         prefixes = ["contains notable emotional weight", "reflects underlying tension"]
     else:
         prefixes = ["unfolds with", "is characterized by"]
-    
+  
     prefix = random.choice(prefixes)
-    
+  
     arc_descriptors = {
         "resolution": "progressing toward integration",
         "escalation": "building toward confrontation", 
         "stable": "sustained throughout",
         "shift": "transitioning between states"
     }
-    
+  
     arc_desc = arc_descriptors.get(arc_type, "structured around emotional movement")
-    
+  
     return f"{prefix.capitalize()} {dominant_emotion or 'complexity'} {arc_desc} ({arc_type})."
 
 def _build_symbolic_processes(top_symbols, dominant_emotion, dynamics, mentioned_symbols):
     """LEVEL 1: Emotion-fused symbol + dynamic phrasing."""
     lines = []
-    
+  
     # Primary symbols with weight-based depth (LEVEL 5) - EXPANDED
     if top_symbols:
         primary = top_symbols[0]
@@ -268,12 +321,12 @@ def _build_symbolic_processes(top_symbols, dominant_emotion, dynamics, mentioned
             )
 
         mentioned_symbols.update([primary] + secondaries)
-    
+  
     # Emotion-aware dynamics (LEVEL 1)
     sorted_dynamics = sorted(dynamics, key=lambda d: d.get("strength", 0), reverse=True)
     for i, d in enumerate(sorted_dynamics[:3]):  # Top 3 only
         dynamic = d.get("dynamic")
-        
+      
         if dynamic in EMOTION_AWARE_POOLS:
             pool = EMOTION_AWARE_POOLS[dynamic]
             if dominant_emotion and dominant_emotion in pool:
@@ -284,9 +337,9 @@ def _build_symbolic_processes(top_symbols, dominant_emotion, dynamics, mentioned
             # Fallback phrasing
             base = f"{dynamic.replace('_', ' ')} process"
             phrase = f"A {base} emerges with particular clarity."
-        
+      
         lines.append(phrase)
-    
+  
     return " ".join(lines)
 
 def _build_psychological_meaning(dynamics, dominant_emotion, mentioned_symbols):
@@ -297,13 +350,13 @@ def _build_psychological_meaning(dynamics, dominant_emotion, mentioned_symbols):
         ("exposure", "shame"): "conflict between visibility and vulnerability", 
         ("stagnation", "fear"): "struggle between inertia and anxiety"
     }
-    
+  
     dynamics_set = {d.get("dynamic") for d in dynamics}
-    
+  
     for pattern, description in conflict_patterns.items():
         if all(p in dynamics_set for p in pattern):
             return f"The dream appears to revolve around a core {description}."
-    
+  
     # EXPANDED default psychological framing
     return (
         "From a psychological perspective, dreams rarely operate through fixed symbolic "
@@ -355,7 +408,7 @@ def _build_reflective_question(dominant_emotion, trauma_level):
             "recent experiences, relationships, or inner concerns may provide deeper personal insight."
         )
     }
-    
+  
     # Trauma override
     if trauma_level == "High":
         return questions["High"]

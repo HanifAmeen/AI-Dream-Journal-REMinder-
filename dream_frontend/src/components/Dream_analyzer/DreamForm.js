@@ -1,4 +1,4 @@
-// DreamForm.js — FINAL (Backend-aligned, no dead fields)
+// DreamForm.js — FINAL (Backend-aligned with profile toggle)
 
 import React, { useState, useRef } from "react";
 import "./DreamForm.css";
@@ -9,6 +9,7 @@ function DreamForm({ onAdd }) {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [useProfile, setUseProfile] = useState(true); // Added profile toggle state
 
   const recognitionRef = useRef(null);
   const autoRestartRef = useRef(false);
@@ -49,7 +50,7 @@ function DreamForm({ onAdd }) {
 
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript.trim() + " ";
+         finalTranscript += event.results[i][0].transcript.trim() + " ";
         }
       }
 
@@ -118,8 +119,8 @@ function DreamForm({ onAdd }) {
     setMessage("");
 
     try {
-      // 🔑 ONLY send what backend actually uses
-      await onAdd({ title, content });
+      // Send title, content, AND use_profile to backend
+      await onAdd({ title, content, use_profile: useProfile });
 
       setTitle("");
       setContent("");
@@ -215,6 +216,18 @@ function DreamForm({ onAdd }) {
           >
             Clear
           </button>
+        </div>
+
+        {/* Profile Toggle - Added near submit button */}
+        <div className="profile-toggle">
+          <label>
+            <input
+              type="checkbox"
+              checked={useProfile}
+              onChange={() => setUseProfile(!useProfile)}
+            />
+            Personalize interpretation using my profile
+          </label>
         </div>
       </form>
 

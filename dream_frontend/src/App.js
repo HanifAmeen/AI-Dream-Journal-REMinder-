@@ -13,7 +13,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Common/Navbar/Navbar";
 import Home from "./components/Home/HomePage";
 
-import ProfilePage from "./components/Profile/profile";   // ⭐ PROFILE IMPORT
+import ProfilePage from "./components/Profile/profile";
 
 import ChatbotButton from "./components/Chatbot/ChatbotButton";
 import ChatbotPanel from "./components/Chatbot/ChatbotPanel";
@@ -33,7 +33,9 @@ function App() {
   const standalonePages = ["/welcome", "/login", "/signup"];
   const isStandalone = standalonePages.includes(location.pathname);
 
-  // Fetch dreams
+  /* -------------------------------------------------
+     Fetch Dreams
+  --------------------------------------------------*/
   const fetchDreams = async () => {
     try {
       const res = await fetch("http://127.0.0.1:5000/get_dreams", {
@@ -53,12 +55,20 @@ function App() {
     }
   };
 
-  const addDream = async ({ title, content, mood }) => {
+  /* -------------------------------------------------
+     Add Dream  ⭐ FIXED HERE
+  --------------------------------------------------*/
+  const addDream = async ({ title, content, mood, use_profile }) => {
     try {
       const res = await fetch("http://127.0.0.1:5000/add_dream", {
         method: "POST",
         headers: authHeaders(),
-        body: JSON.stringify({ title, content, mood }),
+        body: JSON.stringify({
+          title,
+          content,
+          mood,
+          use_profile   // ⭐ NOW SENT TO BACKEND
+        }),
       });
 
       if (res.status === 401) {
@@ -78,6 +88,9 @@ function App() {
     }
   };
 
+  /* -------------------------------------------------
+     Delete Dream
+  --------------------------------------------------*/
   const deleteDream = async (id) => {
     try {
       await fetch(`http://127.0.0.1:5000/delete_dream/${id}`, {
@@ -91,6 +104,9 @@ function App() {
     }
   };
 
+  /* -------------------------------------------------
+     Load Dreams
+  --------------------------------------------------*/
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -98,16 +114,21 @@ function App() {
     fetchDreams();
   }, [location.pathname]);
 
+  /* -------------------------------------------------
+     Scroll Helper
+  --------------------------------------------------*/
   const scrollToBottom = () => {
     if (listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight;
     }
   };
 
+  /* -------------------------------------------------
+     App Layout
+  --------------------------------------------------*/
   return (
     <>
       {isStandalone ? (
-        // Standalone pages (no navbar, no footer)
         <Routes>
           <Route path="/welcome" element={<LandingPage />} />
           <Route path="/login" element={<Login onLogin={() => navigate("/home")} />} />
@@ -115,7 +136,6 @@ function App() {
           <Route path="/" element={<Navigate to="/welcome" />} />
         </Routes>
       ) : (
-        // Authenticated layout
         <div className="App">
 
           <Navbar />
@@ -156,7 +176,6 @@ function App() {
                 }
               />
 
-              {/* ⭐ PROFILE PAGE */}
               <Route
                 path="/profile"
                 element={
@@ -174,7 +193,7 @@ function App() {
 
           <Footer />
 
-          {/* Global Chatbot */}
+          {/* Chatbot */}
           <ChatbotButton />
 
           <ChatbotPanel
