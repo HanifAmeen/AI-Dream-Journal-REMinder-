@@ -22,6 +22,11 @@ export default function ChatbotPanel({ page, dreamContext }) {
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
 
+  // ✅ NEW: Cancel request function
+  const cancelRequest = () => {
+    setIsTyping(false);
+  };
+
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -183,11 +188,19 @@ export default function ChatbotPanel({ page, dreamContext }) {
             <div className="chatbot-message-row bot">
               <Mascot state="thinking" small />
 
+              {/* ✅ UPDATED: Typing indicator with Cancel button */}
               <div className="chatbot-message-bubble bot typing">
                 Spector is thinking
                 <span className="dot">.</span>
                 <span className="dot">.</span>
                 <span className="dot">.</span>
+
+                <button
+                  className="cancel-btn"
+                  onClick={cancelRequest}
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           )}
@@ -195,14 +208,29 @@ export default function ChatbotPanel({ page, dreamContext }) {
           <div ref={messagesEndRef} />
         </div>
 
+        {/* ✅ UPDATED: Input with Send button */}
         <div className="chatbot-input">
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-            placeholder="Ask about your dream…"
-            disabled={isTyping || !conversationId}
-          />
+         <textarea
+  className="chatbot-textarea"
+  value={input}
+  onChange={(e) => setInput(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }}
+  placeholder="Ask about your dream…"
+  disabled={isTyping || !conversationId}
+/>
+
+          <button
+            className="chatbot-send-btn"
+            onClick={sendMessage}
+            disabled={isTyping || !input.trim()}
+          >
+            Send
+          </button>
         </div>
       </div>
 

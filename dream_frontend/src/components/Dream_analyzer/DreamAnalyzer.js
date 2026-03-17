@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import DreamForm from "./DreamForm";
 import DreamList from "./DreamList";
 import "./DreamPage.css";
@@ -6,6 +7,7 @@ import { useChatbot } from "../../context/ChatbotContext";
 
 export default function DreamAnalyzer({ dreams, onAdd, onDelete, listRef }) {
   const { setMessages } = useChatbot();
+  const navigate = useNavigate();
 
   // 🔹 Inject dream context when dreams update
   useEffect(() => {
@@ -24,7 +26,16 @@ export default function DreamAnalyzer({ dreams, onAdd, onDelete, listRef }) {
 
   return (
     <div className="dream-journal-page">
-      <h1 className="dream-page-title">AI Dream Analyzer</h1>
+      {/* ✅ Header row with back button on left, title on right */}
+      <div className="dream-page-header">
+        <button
+          className="back-button"
+          onClick={() => navigate(-1)}
+        >
+          ← Back
+        </button>
+        <h1 className="dream-page-title">AI Dream Analyzer</h1>
+      </div>
 
       <div className="dream-dashboard">
         <div className="dream-form-wrapper">

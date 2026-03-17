@@ -2,10 +2,50 @@
    Scoped layout for DreamAnalyzer (form + list side-by-side)
 */
 
-.dream-journal-page {
-  padding-top: 110px;
+/* FIXED: Header with back button on left, title centered */
+.dream-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 20px; /* Reduced from 110px - just enough for comfort */
   padding-left: 32px;
   padding-right: 32px;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.back-button {
+  position: relative;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.back-button:hover {
+  background: linear-gradient(135deg, #6d28d9, #5b21b6);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6);
+}
+
+.back-button:active {
+  transform: translateY(0);
+}
+
+/* Main page container */
+.dream-journal-page {
+  padding-top: 0;
   padding-bottom: 20px;
   display: flex;
   flex-direction: column;
@@ -16,10 +56,11 @@
   color: #e0e0ff;
 }
 
-/* Title */
+/* Title - centered within flex header */
 .dream-page-title {
+  margin: 0;
+  flex: 1;
   text-align: center;
-  margin-bottom: 20px;
   font-size: 32px;
   color: #b0b0ff;
   text-shadow: 0 0 12px #8e24aa;
@@ -30,10 +71,12 @@
   display: flex;
   gap: 28px;
   width: 100%;
-  height: calc(100vh - 180px);
+  height: calc(100vh - 220px); /* Adjusted for header height */
   overflow: hidden;
   box-sizing: border-box;
   align-items: stretch;
+  padding-left: 32px;
+  padding-right: 32px;
 }
 
 /* Left column: form */
@@ -108,11 +151,13 @@
   background: transparent !important;
 }
 
-/* responsive: stack vertically under 980px */
+/* Responsive: stack vertically under 980px */
 @media (max-width: 980px) {
   .dream-dashboard {
     flex-direction: column;
     height: auto;
+    padding-left: 22px;
+    padding-right: 22px;
   }
   .dream-form-wrapper,
   .dream-list-wrapper {
@@ -123,16 +168,32 @@
   .dream-page-title { 
     font-size: 26px; 
   }
+  .dream-page-header {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
   .dream-form-wrapper::-webkit-scrollbar,
   .dream-list-wrapper::-webkit-scrollbar {
     width: 6px !important;
   }
 }
 
-/* small mobile tweaks */
+/* Small mobile tweaks */
 @media (max-width: 520px) {
+  .dream-page-header {
+    padding-top: 80px;
+    padding-left: 14px;
+    padding-right: 14px;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
   .dream-journal-page { 
-    padding: 80px 14px 20px; 
+    padding-bottom: 20px; 
+  }
+  .dream-dashboard {
+    padding-left: 14px;
+    padding-right: 14px;
   }
   .dream-page-title { 
     font-size: 22px; 

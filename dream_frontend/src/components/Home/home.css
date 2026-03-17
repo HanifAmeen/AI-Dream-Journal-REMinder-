@@ -482,3 +482,78 @@ html {
   scrollbar-width: thin !important;
   scrollbar-color: rgba(138, 43, 226, 0.9) rgba(15, 15, 25, 0.4) !important;
 }
+/* Spector Guide */
+
+/* SPECTOR GUIDE */
+
+.spector-guide {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 30px;
+  cursor: pointer;
+  justify-content: center;
+  position: relative;
+}
+
+/* Spector image */
+
+.spector-image {
+  width: 110px;
+  height: auto;
+  animation: spectorFloat 3.5s ease-in-out infinite;
+  filter: drop-shadow(0 6px 15px rgba(0,0,0,0.45));
+  transition: transform 0.3s ease;
+}
+
+.spector-guide:hover .spector-image {
+  transform: scale(1.05);
+}
+
+/* Speech bubble */
+
+.spector-bubble {
+  background: rgba(20, 25, 55, 0.85);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(120,140,255,0.25);
+  border-radius: 16px;
+  padding: 12px 16px;
+  max-width: 260px;
+  color: #e6e9ff;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  position: relative;
+  text-align: left;
+}
+
+/* Speech bubble tail */
+
+.spector-bubble::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 18px;
+  border-width: 8px;
+  border-style: solid;
+  border-color: transparent rgba(20, 25, 55, 0.85) transparent transparent;
+}
+
+/* Text */
+
+.spector-bubble strong {
+  color: #aab3ff;
+  font-size: 16px;
+}
+
+.spector-bubble p {
+  font-size: 14px;
+  margin-top: 4px;
+  opacity: 0.9;
+}
+
+/* Floating animation */
+
+@keyframes spectorFloat {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0px); }
+}

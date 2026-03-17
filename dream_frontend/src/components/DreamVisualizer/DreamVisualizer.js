@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import "./DreamVisualizer.css";
 
 function DreamVisualizer() {
@@ -8,6 +9,9 @@ function DreamVisualizer() {
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+
+  // ✅ ADDED: React Router navigation
+  const navigate = useNavigate();
 
   // ✅ FIXED: Memoized fetch function to prevent stale closures
   const fetchWithAuth = useCallback(async (url, options = {}) => {
@@ -60,8 +64,10 @@ function DreamVisualizer() {
       });
 
       if (data.images && data.dream_batch_id) {
+        // ⭐ MODIFIED: Store the dream narrative in the batch (already done ✅)
         const newBatch = {
           id: data.dream_batch_id,
+          dream_text: dream, // ⭐ store the dream narrative - ALREADY FIXED
           images: data.images.map(url => ({ url: url })),
           count: data.images.length,
           created_at: new Date().toISOString()
@@ -122,13 +128,21 @@ function DreamVisualizer() {
 
   return (
     <div className="visualizer-container">
-      {/* Hero Header */}
-      <div className="hero-header">
-        <div className="hero-content">
-          <h1 className="visualizer-title">Dream Visualizer</h1>
-          <p className="hero-subtitle">
-            Transform your dreams into stunning artwork with AI magic ✨
-          </p>
+      {/* ✅ ADDED: Header with Back Button */}
+      <div className="visualizer-header">
+        <button
+          className="back-button"
+          onClick={() => navigate(-1)}
+        >
+          ← Back
+        </button>
+        <div className="hero-header">
+          <div className="hero-content">
+            <h1 className="visualizer-title">Dream Visualizer</h1>
+            <p className="hero-subtitle">
+              Transform your dreams into stunning artwork with AI magic ✨
+            </p>
+          </div>
         </div>
       </div>
 
@@ -199,6 +213,14 @@ function DreamVisualizer() {
           
           {dreamBatches.map((batch, batchIndex) => (
             <div key={batch.id} className="dream-batch">
+              {/* ✅ FIXED: Dream text display - ALREADY IMPLEMENTED */}
+              {batch.dream_text && (
+                <div className="dream-text-display">
+                  <span className="dream-quote">"</span>
+                  <p>{batch.dream_text}</p>
+                </div>
+              )}
+
               <div className="batch-header">
                 <div className="batch-left">
                   <h3 className="batch-title">Dream #{batchIndex + 1}</h3>

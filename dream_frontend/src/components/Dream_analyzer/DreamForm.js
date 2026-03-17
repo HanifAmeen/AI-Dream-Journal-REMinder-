@@ -1,7 +1,6 @@
-// DreamForm.js — FINAL (Backend-aligned with profile toggle)
-
 import React, { useState, useRef } from "react";
 import "./DreamForm.css";
+import HelpGuide from "./helpGuide";
 
 function DreamForm({ onAdd }) {
   const [title, setTitle] = useState("");
@@ -9,14 +8,11 @@ function DreamForm({ onAdd }) {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [useProfile, setUseProfile] = useState(true); // Added profile toggle state
+  const [useProfile, setUseProfile] = useState(true);
 
   const recognitionRef = useRef(null);
   const autoRestartRef = useRef(false);
 
-  /* ------------------------------------------------------
-     Initialize Web Speech API
-  -------------------------------------------------------*/
   const initSpeechRecognition = () => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -31,12 +27,10 @@ function DreamForm({ onAdd }) {
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
+
     return recognition;
   };
 
-  /* ------------------------------------------------------
-     Start Mic
-  -------------------------------------------------------*/
   const startRecognition = () => {
     const recognition = initSpeechRecognition();
     if (!recognition) return;
@@ -50,14 +44,13 @@ function DreamForm({ onAdd }) {
 
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
-         finalTranscript += event.results[i][0].transcript.trim() + " ";
+          finalTranscript += event.results[i][0].transcript.trim() + " ";
         }
       }
 
       if (finalTranscript.trim()) {
         const cleaned = finalTranscript.trim();
 
-        // Preserve sentence boundaries
         setContent((prev) =>
           prev ? prev + "\n" + cleaned : cleaned
         );
@@ -65,7 +58,7 @@ function DreamForm({ onAdd }) {
     };
 
     recognition.onerror = (event) => {
-      console.error("Speech recognition error:", event.error);
+      console.error(event.error);
       setMessage("Mic error — try again.");
       setIsRecording(false);
       autoRestartRef.current = false;
@@ -85,16 +78,14 @@ function DreamForm({ onAdd }) {
     recognition.start();
   };
 
-  /* ------------------------------------------------------
-     Stop Mic
-  -------------------------------------------------------*/
   const stopRecognition = () => {
     if (recognitionRef.current) {
       autoRestartRef.current = false;
       recognitionRef.current.stop();
-      setIsRecording(false);
 
+      setIsRecording(false);
       setMessage("Stopped listening.");
+
       setTimeout(() => setMessage(""), 1500);
     }
   };
@@ -103,9 +94,6 @@ function DreamForm({ onAdd }) {
     isRecording ? stopRecognition() : startRecognition();
   };
 
-  /* ------------------------------------------------------
-     Submit Form
-  -------------------------------------------------------*/
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -119,123 +107,135 @@ function DreamForm({ onAdd }) {
     setMessage("");
 
     try {
-      // Send title, content, AND use_profile to backend
-      await onAdd({ title, content, use_profile: useProfile });
+      await onAdd({
+        title,
+        content,
+        use_profile: useProfile
+      });
 
       setTitle("");
       setContent("");
+
       setMessage("Dream saved!");
       setTimeout(() => setMessage(""), 2000);
+
     } catch (err) {
-      console.error("Error saving dream:", err);
+      console.error(err);
       setMessage("Error saving dream.");
       setTimeout(() => setMessage(""), 2000);
+
     } finally {
       setLoading(false);
     }
   };
 
-  /* ------------------------------------------------------
-     Clear Form
-  -------------------------------------------------------*/
   const handleClear = () => {
     setTitle("");
     setContent("");
+
     setMessage("Cleared form.");
     setTimeout(() => setMessage(""), 1500);
   };
 
-  /* ------------------------------------------------------
-     Auto-Resize Textarea
-  -------------------------------------------------------*/
   const autoResize = (e) => {
     e.target.style.height = "auto";
     e.target.style.height = e.target.scrollHeight + "px";
   };
 
   return (
-    <div className="dream-form-container">
-      <h2 className="dream-form-title">Add Your Dream</h2>
+    <>
+      {/* Help Guide Button + Modal */}
+      <HelpGuide />
 
-      <form onSubmit={handleSubmit} className="dream-form">
-        <input
-          type="text"
-          placeholder="Dream title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-          className="dream-input"
-        />
+      <div className="dream-form-container">
 
-        <textarea
-          placeholder="Write or speak your dream..."
-          value={content}
-          onChange={(e) => {
-            setContent(e.target.value);
-            autoResize(e);
-          }}
-          required
-          className="dream-textarea"
-          rows={1}
-        />
+        <div className="dream-form-header">
+          <h2 className="dream-form-title">
+            Add Your Dream
+          </h2>
+        </div>
 
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            justifyContent: "center",
-            marginTop: "10px",
-          }}
+        <form
+          onSubmit={handleSubmit}
+          className="dream-form"
         >
-          <button
-            type="submit"
-            className="dream-button"
-            disabled={loading}
-          >
-            {loading ? "Analyzing..." : "Analyze Dream"}
-          </button>
 
-          <button
-            type="button"
-            onClick={handleMicClick}
-            className={`dream-button mic-button ${
-              isRecording ? "recording" : ""
-            }`}
-          >
-            {isRecording ? "🛑 Stop" : "🎤 Speak"}
-          </button>
+          <input
+            type="text"
+            placeholder="Dream title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            className="dream-input"
+          />
 
-          <button
-            type="button"
-            onClick={handleClear}
-            className="dream-button"
-            style={{
-              background:
-                "linear-gradient(to right, #f10c0c, #7c0000)",
+          <textarea
+            placeholder="Write or speak your dream..."
+            value={content}
+            onChange={(e) => {
+              setContent(e.target.value);
+              autoResize(e);
             }}
-          >
-            Clear
-          </button>
-        </div>
+            required
+            className="dream-textarea"
+            rows={1}
+          />
 
-        {/* Profile Toggle - Added near submit button */}
-        <div className="profile-toggle">
-          <label>
-            <input
-              type="checkbox"
-              checked={useProfile}
-              onChange={() => setUseProfile(!useProfile)}
-            />
-            Personalize interpretation using my profile
-          </label>
-        </div>
-      </form>
+          <div className="dream-buttons">
 
-      {loading && <div className="loader"></div>}
-      {message && (
-        <p className="dream-message">{message}</p>
-      )}
-    </div>
+            <button
+              type="submit"
+              className="dream-button"
+              disabled={loading}
+            >
+              {loading ? "Analyzing..." : "Analyze Dream"}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleMicClick}
+              className={`dream-button mic-button ${
+                isRecording ? "recording" : ""
+              }`}
+            >
+              {isRecording ? "🛑 Stop" : "🎤 Speak"}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleClear}
+              className="dream-button clear-button"
+            >
+              Clear
+            </button>
+
+          </div>
+
+          <div className="profile-toggle">
+            <label>
+              <input
+                type="checkbox"
+                checked={useProfile}
+                onChange={() => setUseProfile(!useProfile)}
+              />
+              Personalize interpretation using my profile
+            </label>
+          </div>
+
+        </form>
+
+        {loading && (
+          <div className="loader"></div>
+        )}
+
+        {message && (
+          <p className="dream-message">
+            {message}
+          </p>
+        )}
+
+      </div>
+    </>
   );
 }
 

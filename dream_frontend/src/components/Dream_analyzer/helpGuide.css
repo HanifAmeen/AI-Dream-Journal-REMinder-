@@ -1,0 +1,144 @@
+/* Help Button */
+.dream-help-button {
+  background: linear-gradient(135deg, #4a6cf7, #6d8cff);
+  color: white;
+  border: none;
+  padding: 7px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+}
+
+.dream-help-button:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #3f5de2, #5c7cff);
+  box-shadow: 0 5px 14px rgba(0,0,0,0.45);
+}
+
+/* Overlay */
+.dream-help-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+/* Modal - ✅ COMPACT VERSION */
+.dream-help-modal {
+  width: 500px;              /* ✅ REDUCED: More compact */
+  max-width: 90vw;           /* ✅ Responsive */
+  
+  /* ✅ PERFECT HEIGHT: Fits screen perfectly */
+  max-height: 75vh;          /* Smaller + fits buttons */
+  height: auto;
+  
+  overflow-y: auto;
+
+  background: #0f172a;
+  color: #e5e7eb;
+  padding: 20px;             /* ✅ Less padding */
+  border-radius: 14px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+
+  text-align: left;
+  line-height: 1.6;
+}
+
+/* ✅ Ensure buttons always visible */
+.dream-help-options {
+  margin-top: 20px;          /* ✅ Less top spacing */
+  padding-top: 15px;         /* ✅ Visual separation */
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Title - ✅ More compact */
+.dream-help-modal h2 {
+  font-size: 22px;           /* Slightly smaller */
+  margin-bottom: 16px;       /* Less bottom space */
+  color: white;
+}
+
+/* Section headings - ✅ Tighter spacing */
+.dream-help-steps h3 {
+  font-size: 16px;
+  margin-top: 20px;          /* Reduced */
+  margin-bottom: 8px;
+  color: #60a5fa;
+}
+
+/* Lists - ✅ Compact */
+.dream-help-steps ol,
+.dream-help-steps ul {
+  padding-left: 20px;
+}
+
+.dream-help-steps li {
+  margin-bottom: 6px;        /* Tighter lines */
+  font-size: 14.5px;         /* Slightly smaller */
+}
+
+/* Section dividers */
+.help-divider {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  margin: 16px 0;            /* Reduced */
+}
+
+/* Scrollbar */
+.dream-help-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dream-help-modal::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 4px;
+}
+
+/* Close button */
+.dream-help-close {
+  background: #4a6cf7;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.dream-help-close:hover {
+  background: #3f5de2;
+}
+
+/* Animation */
+@keyframes helpFadeIn {
+  from {
+    transform: scale(0.95) translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+.dream-help-overlay {
+  position: fixed !important;  /* ✅ GUARANTEES full screen */
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 9999 !important;    /* ✅ Above everything */
+}

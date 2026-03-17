@@ -195,22 +195,24 @@
 .interpretation {
   background: linear-gradient(
     145deg,
-    rgba(124, 58, 237, 0.18),
+    rgba(124, 58, 237, 0.14),
     rgba(124, 58, 237, 0.05)
   );
   border-left: 4px solid var(--accent-main);
   padding: 1.25rem 1.5rem;
   border-radius: 16px;
   font-size: 1rem;
-  line-height: 1.8;
+  line-height: 1.7;
   color: var(--text-main);
 }
 
 .interpretation-paragraph {
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.4rem;
   max-width: 72ch;
   text-align: justify;
-  line-height: 1.6;
+  text-justify: inter-word;
+  hyphens: auto;
+  line-height: 1.65;
 }
 
 .interpretation-paragraph:last-child {
@@ -219,12 +221,12 @@
 
 .interpretation-list {
   margin: 1.25rem 0;
-  padding-left: 1.25rem;
+  padding-left: 1.5rem;
 }
 
 .interpretation-list li {
-  margin-bottom: 0.7rem;
-  line-height: 1.5;
+  margin-bottom: 0.6rem;
+  line-height: 1.6;
   color: #e9d5ff;
 }
 
@@ -699,12 +701,12 @@
   opacity: 0;
   max-height: 0;
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: max-height 0.3s ease;
 }
 
 .metric-help.show {
   opacity: 1;
-  max-height: 200px;
+  max-height: 500px;
   margin-top: 1.25rem;
 }
 

@@ -6,10 +6,10 @@
 .visualizer-container {
   width: 100%;
   min-height: 100vh;
-  padding: 40px 20px;
+
   color: white;
   background: linear-gradient(135deg, #0b0f1a 0%, #1a1f2e 50%, #16213e 100%);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
   position: relative;
   overflow-x: hidden;
   max-width: 1400px;
@@ -18,30 +18,40 @@
 
 /* ✨ HERO HEADER - FIXED */
 .hero-header {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   text-align: center;
   margin-bottom: 3rem;
-  animation: fadeInUp 1s ease-out;
 }
 
 .hero-content {
-  animation: fadeInUp 1s ease-out;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+  
 }
 
 .hero-content h1 {
-  font-size: 3rem;
+  text-align: center;
+  font-size: 50px;
+  margin: 0 auto;
   background: linear-gradient(45deg, #6b8cff, #9f7aea, #ff6b6b);
+   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin: 0;
-  font-weight: 800;
-  text-shadow: 0 4px 20px rgba(107, 140, 255, 0.3);
+    text-shadow: 0 4px 20px rgba(107, 140, 255, 0.35);
+
+  /* smooth animation */
+  animation: gradientShift 6s ease infinite;
 }
 
 .hero-subtitle {
-  font-size: 1.3rem;
-  color: rgba(255,255,255,0.8);
-  margin-top: 1rem;
+  text-align: center;
+  margin: 1rem auto 0 auto;
   font-weight: 300;
 }
 
@@ -573,4 +583,57 @@
   .dream-batch {
     margin: 30px auto;
   }
+}
+.dream-text-display {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  border-left: 4px solid #a78bfa;
+  backdrop-filter: blur(10px);
+}
+
+.dream-quote {
+  font-size: 1.5rem;
+  margin-right: 0.5rem;
+  opacity: 0.8;
+}
+
+.dream-text-display p {
+  margin: 0;
+  color: #e2e8f0;
+  font-style: italic;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+/* Header with back button */
+.visualizer-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.back-button {
+  position: relative;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.back-button:hover {
+  background: linear-gradient(135deg, #6d28d9, #5b21b6);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6);
 }

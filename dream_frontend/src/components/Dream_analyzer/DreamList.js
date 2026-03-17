@@ -102,58 +102,61 @@ export default function DreamList({ dreams = [] }) {
   };
 
   // Interpretation rendering function - ✅ UPDATED
-  const renderInterpretation = (text) => {
-    if (typeof text !== "string") return null;
+const renderInterpretation = (text) => {
+  if (typeof text !== "string") return null;
 
-    // 🔥 FIXED: Remove ** markdown bold symbols
-    const lines = text
-      .replace(/\*\*/g, "")
-      .split("\n")
-      .map((l) => l.trim());
+  // ✅ remove markdown bold markers properly
+  const cleaned = text.replace(/\*\*/g, "");
 
-    const blocks = [];
-    let listBuffer = [];
+  // ✅ split correctly on new lines
+  const lines = cleaned.split("\n").map((l) => l.trim());
 
-    lines.forEach((line) => {
-      if (line.startsWith("- ")) {
-        listBuffer.push(line.replace("- ", ""));
-      } else {
-        if (listBuffer.length) {
-          blocks.push({ type: "list", items: [...listBuffer] });
-          listBuffer = [];
-        }
-        if (line) {
-          blocks.push({ type: "text", content: line });
-        }
+  const blocks = [];
+  let listBuffer = [];
+
+  lines.forEach((line) => {
+    // bullet list
+    if (line.startsWith("- ")) {
+      listBuffer.push(line.replace("- ", ""));
+    } 
+    else {
+      if (listBuffer.length) {
+        blocks.push({ type: "list", items: [...listBuffer] });
+        listBuffer = [];
       }
-    });
 
-    if (listBuffer.length) {
-      blocks.push({ type: "list", items: [...listBuffer] });
+      if (line) {
+        blocks.push({ type: "paragraph", content: line });
+      }
+    }
+  });
+
+  if (listBuffer.length) {
+    blocks.push({ type: "list", items: [...listBuffer] });
+  }
+
+  return blocks.map((block, idx) => {
+    if (block.type === "paragraph") {
+      return (
+        <p key={idx} className="interpretation-paragraph">
+          {block.content}
+        </p>
+      );
     }
 
-    return blocks.map((block, idx) => {
-      if (block.type === "text") {
-        return (
-          <p key={idx} className="interpretation-paragraph">
-            {block.content}
-          </p>
-        );
-      }
+    if (block.type === "list") {
+      return (
+        <ul key={idx} className="interpretation-list">
+          {block.items.map((item, i) => (
+            <li key={i}>{item}</li>
+          ))}
+        </ul>
+      );
+    }
 
-      if (block.type === "list") {
-        return (
-          <ul key={idx} className="interpretation-list">
-            {block.items.map((item, i) => (
-              <li key={i}>{item}</li>
-            ))}
-          </ul>
-        );
-      }
-
-      return null;
-    });
-  };
+    return null;
+  });
+};
 
   if (!dreams.length) {
     return (
@@ -174,6 +177,8 @@ export default function DreamList({ dreams = [] }) {
         const symbols = dream.symbols || {};
         const arc = dream.emotional_arc || {};
         const confidence = dream.confidence || {};
+        // ✅ NEW: Add similarity variable
+        const similarity = dream.dream_similarity;
         const isOpen = open[id];
         const showHelp = showSymbolHelp[id];
         // ✅ NEW: Individual metric help state
@@ -543,6 +548,45 @@ export default function DreamList({ dreams = [] }) {
                         emotional patterns associated with distress such as
                         threat, confinement, or unresolved fear.
                       </div>
+                    </div>
+
+                    {/* 4️⃣ Dream Similarity ✅ NEW */}
+                    <div className="metric-card similarity">
+                      <div className="metric-header">
+                        <span className="metric-title">Dream Similarity</span>
+
+                        <button
+                          className="metric-help-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleMetricHelp(id, "similarity");
+                          }}
+                        >
+                          ?
+                        </button>
+                      </div>
+
+                      <div className="metric-value-lg">
+                        {similarity ? `${similarity.toFixed(1)}%` : "—"}
+                      </div>
+
+                      <div
+  className={`metric-help ${
+    showMetricInfo?.similarity ? "show" : ""
+  }`}
+>
+  Dream similarity measures how closely your dream narrative
+  matches dreams recorded in the DreamBank dataset. The score
+  is calculated using semantic similarity analysis.
+
+  <br /><br />
+
+  This dream is{" "}
+  <strong>
+    {similarity ? `${similarity.toFixed(1)}%` : "—"}
+  </strong>{" "}
+   semantically similar to at least one dream in the dataset.
+</div>
                     </div>
                   </div>
                 </div>
