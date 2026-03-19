@@ -3,7 +3,6 @@ import uuid
 
 
 class ConversationMemory:
-
     def __init__(self, db_path="dreams.db"):
         self.db_path = db_path
         self._init_db()
@@ -12,13 +11,13 @@ class ConversationMemory:
     # Create tables if they don't exist
     # ----------------------------------
     def _init_db(self):
-
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
 
         cur.execute("""
         CREATE TABLE IF NOT EXISTS conversations (
             id TEXT PRIMARY KEY,
+            user_id TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         """)
@@ -29,6 +28,7 @@ class ConversationMemory:
             conversation_id TEXT,
             role TEXT,
             content TEXT,
+            user_id TEXT,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         """)
@@ -39,16 +39,15 @@ class ConversationMemory:
     # ----------------------------------
     # Start new chat
     # ----------------------------------
-    def start_new_conversation(self):
-
+    def start_new_conversation(self, user_id):
         conversation_id = str(uuid.uuid4())
 
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
 
         cur.execute(
-            "INSERT INTO conversations (id) VALUES (?)",
-            (conversation_id,)
+            "INSERT INTO conversations (id, user_id) VALUES (?, ?)",
+            (conversation_id, user_id)
         )
 
         conn.commit()
@@ -59,17 +58,16 @@ class ConversationMemory:
     # ----------------------------------
     # Save message
     # ----------------------------------
-    def add_message(self, conversation_id, role, content):
-
+    def add_message(self, conversation_id, role, content, user_id):
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
 
         cur.execute(
             """
-            INSERT INTO messages (conversation_id, role, content)
-            VALUES (?, ?, ?)
+            INSERT INTO messages (conversation_id, role, content, user_id)
+            VALUES (?, ?, ?, ?)
             """,
-            (conversation_id, role, content)
+            (conversation_id, role, content, user_id)
         )
 
         conn.commit()
@@ -78,8 +76,7 @@ class ConversationMemory:
     # ----------------------------------
     # Return formatted history for LLM
     # ----------------------------------
-    def get_history(self, conversation_id, limit=10):
-
+    def get_history(self, conversation_id, user_id, limit=10):
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
 
@@ -87,11 +84,11 @@ class ConversationMemory:
             """
             SELECT role, content
             FROM messages
-            WHERE conversation_id = ?
+            WHERE conversation_id = ? AND user_id = ?
             ORDER BY id DESC
             LIMIT ?
             """,
-            (conversation_id, limit)
+            (conversation_id, user_id, limit)
         )
 
         rows = cur.fetchall()
@@ -111,8 +108,7 @@ class ConversationMemory:
     # ----------------------------------
     # Return messages for frontend
     # ----------------------------------
-    def get_messages(self, conversation_id):
-
+    def get_messages(self, conversation_id, user_id):
         conn = sqlite3.connect(self.db_path)
         cur = conn.cursor()
 
@@ -120,10 +116,10 @@ class ConversationMemory:
             """
             SELECT role, content
             FROM messages
-            WHERE conversation_id = ?
+            WHERE conversation_id = ? AND user_id = ?
             ORDER BY id
             """,
-            (conversation_id,)
+            (conversation_id, user_id)
         )
 
         rows = cur.fetchall()

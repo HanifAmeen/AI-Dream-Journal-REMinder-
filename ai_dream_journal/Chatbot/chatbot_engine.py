@@ -3,7 +3,6 @@ from conversation_memory import ConversationMemory
 
 
 class ChatbotEngine:
-
     SYSTEM_PROMPT = """
 You are Spectre, a calm, insightful, and emotionally intelligent guide who helps people explore and understand their dreams.
 
@@ -46,17 +45,16 @@ Help the user feel understood while guiding them toward deeper reflection about 
     # ---------------------------------
     # Main chat response
     # ---------------------------------
-    def respond(self, user_message, conversation_id=None, dream_context=None):
-
+    def respond(self, user_message, conversation_id=None, dream_context=None, user_id=None):
         # Create conversation if needed
         if not conversation_id:
-            conversation_id = self.memory.start_new_conversation()
+            conversation_id = self.memory.start_new_conversation(user_id)
 
         # Save user message
-        self.memory.add_message(conversation_id, "user", user_message)
+        self.memory.add_message(conversation_id, "user", user_message, user_id)
 
         # Load conversation history
-        history = self.memory.get_history(conversation_id)
+        history = self.memory.get_history(conversation_id, user_id)
 
         # Build context
         context_parts = []
@@ -81,7 +79,7 @@ Spectre:
         reply = generate_reply(self.SYSTEM_PROMPT, prompt)
 
         # Save bot reply
-        self.memory.add_message(conversation_id, "assistant", reply)
+        self.memory.add_message(conversation_id, "assistant", reply, user_id)
 
         return {
             "type": "answer",
@@ -92,14 +90,11 @@ Spectre:
     # ---------------------------------
     # Start new chat
     # ---------------------------------
-    def start_new_conversation(self):
-        return self.memory.start_new_conversation()
+    def start_new_conversation(self, user_id):
+        return self.memory.start_new_conversation(user_id)
 
     # ---------------------------------
     # Get history for frontend
     # ---------------------------------
-    def get_conversation_history(self, conversation_id):
-
-        messages = self.memory.get_messages(conversation_id)
-
-        return messages
+    def get_conversation_history(self, conversation_id, user_id):
+        return self.memory.get_messages(conversation_id, user_id)

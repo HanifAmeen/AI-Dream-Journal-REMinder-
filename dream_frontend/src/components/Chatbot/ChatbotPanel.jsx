@@ -3,6 +3,12 @@ import { useChatbot } from "../../context/ChatbotContext";
 import "./chatbot.css";
 import Mascot from "./Mascot";
 
+// ✅ OPTIONAL BUT CLEAN: define headers once
+const getAuthHeaders = () => ({
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${localStorage.getItem("token")}`
+});
+
 export default function ChatbotPanel({ page, dreamContext }) {
   const {
     isOpen,
@@ -36,29 +42,24 @@ export default function ChatbotPanel({ page, dreamContext }) {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  // Fix 2: Create new conversation if none exists
+  // ✅ STEP 3 — FIXED HISTORY LOADER (with auth header)
   useEffect(() => {
-    if (!conversationId) {
-      fetch("http://127.0.0.1:5000/chatbot/new_chat", {
-        method: "POST"
-      })
-        .then(res => res.json())
-        .then(data => {
-          setConversationId(data.conversation_id);
-          localStorage.setItem("conversation_id", data.conversation_id);
-        })
-        .catch(err => console.error("Failed to create new chat:", err));
-    }
-  }, []);
+    const loadChat = async () => {
+      const storedId = localStorage.getItem("conversation_id");
+      if (!storedId) return;
 
-  // Fix 4: Load chat history when conversationId is available
-  useEffect(() => {
-    if (!conversationId) return;
+      try {
+        const res = await fetch(
+          `http://127.0.0.1:5000/chatbot/history/${storedId}`,
+          {
+            headers: getAuthHeaders()
+          }
+        );
 
-    fetch(`http://127.0.0.1:5000/chatbot/history/${conversationId}`)
-      .then(res => res.json())
-      .then(data => {
+        const data = await res.json();
+
         if (data.messages) {
+          setConversationId(storedId);
           setMessages(
             data.messages.map(m => ({
               role: m.role === "assistant" ? "bot" : "user",
@@ -66,16 +67,21 @@ export default function ChatbotPanel({ page, dreamContext }) {
             }))
           );
         }
-      })
-      .catch(err => console.error("Failed to load chat history:", err));
-  }, [conversationId]);
+      } catch (err) {
+        console.error("Failed to load chat history:", err);
+      }
+    };
 
-  // New Chat with confirmation
+    loadChat();
+  }, []);
+
+  // ✅ STEP 3: KEEP newChat() as is (user explicitly wants new chat)
   const confirmNewChat = async () => {
     setShowConfirmDialog(false);
     try {
       const res = await fetch("http://127.0.0.1:5000/chatbot/new_chat", {
-        method: "POST"
+        method: "POST",
+        headers: getAuthHeaders()
       });
       const data = await res.json();
 
@@ -91,17 +97,32 @@ export default function ChatbotPanel({ page, dreamContext }) {
     setShowConfirmDialog(true);
   };
 
+  // ✅ STEP 1 & STEP 2 — FIXED sendMessage() (with auth everywhere)
   const sendMessage = async () => {
-    if (!input.trim() || isTyping || !conversationId) return;
+    if (!input.trim() || isTyping) return;
 
     const userInput = input;
 
     // 1️⃣ Show user message immediately
-    setMessages((prev) => [...prev, { role: "user", text: userInput }]);
+    setMessages(prev => [...prev, { role: "user", text: userInput }]);
     setInput("");
 
     // 2️⃣ Enter thinking state
     setIsTyping(true);
+
+    // ✅ STEP 2 — Create conversation if needed (with auth)
+    let currentId = conversationId;
+    if (!currentId) {
+      const res = await fetch("http://127.0.0.1:5000/chatbot/new_chat", {
+        method: "POST",
+        headers: getAuthHeaders()
+      });
+
+      const data = await res.json();
+      currentId = data.conversation_id;
+      setConversationId(currentId);
+      localStorage.setItem("conversation_id", currentId);
+    }
 
     let endpoint = "/chatbot/respond";
     let body = {};
@@ -112,21 +133,22 @@ export default function ChatbotPanel({ page, dreamContext }) {
         dream_id: dreamContext?.id || 1,
         question: pendingQuestion,
         answer: userInput,
-        dream_context: dreamContext,
-        conversation_id: conversationId
+        conversation_id: currentId,
+        dream_context: dreamContext
       };
       setPendingQuestion(null);
     } else {
+      // ✅ STEP 1 — Fixed body with conversation_id
       body = {
         message: userInput,
-        dream_context: dreamContext,
-        conversation_id: conversationId
+        conversation_id: currentId,
+        dream_context: dreamContext
       };
     }
 
     const res = await fetch(`http://127.0.0.1:5000${endpoint}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getAuthHeaders(),
       body: JSON.stringify(body)
     });
 
@@ -135,7 +157,7 @@ export default function ChatbotPanel({ page, dreamContext }) {
     // 3️⃣ Artificial thinking delay (UX polish)
     setTimeout(() => {
       setIsTyping(false);
-      setMessages((prev) => [
+      setMessages(prev => [
         ...prev,
         { role: "bot", text: data.response }
       ]);
@@ -154,7 +176,7 @@ export default function ChatbotPanel({ page, dreamContext }) {
         <div className="chatbot-header">
           <span>Spectors Corner</span>
           <div className="header-actions">
-            <button 
+            <button
               onClick={scrollToBottom}
               className="scroll-bottom-btn"
               title="Scroll to bottom"
@@ -177,7 +199,7 @@ export default function ChatbotPanel({ page, dreamContext }) {
                 <Mascot state="replying" small />
               )}
 
-              <div 
+              <div
                 className={`chatbot-message-bubble ${m.role}`}
                 dangerouslySetInnerHTML={{ __html: m.text }}
               />
@@ -204,25 +226,25 @@ export default function ChatbotPanel({ page, dreamContext }) {
               </div>
             </div>
           )}
-          
+
           <div ref={messagesEndRef} />
         </div>
 
         {/* ✅ UPDATED: Input with Send button */}
         <div className="chatbot-input">
-         <textarea
-  className="chatbot-textarea"
-  value={input}
-  onChange={(e) => setInput(e.target.value)}
-  onKeyDown={(e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  }}
-  placeholder="Ask about your dream…"
-  disabled={isTyping || !conversationId}
-/>
+          <textarea
+            className="chatbot-textarea"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
+            placeholder="Ask about your dream…"
+            disabled={isTyping}
+          />
 
           <button
             className="chatbot-send-btn"
@@ -242,13 +264,13 @@ export default function ChatbotPanel({ page, dreamContext }) {
               <h3>Start New Chat?</h3>
               <p>This will clear your current conversation.</p>
               <div className="confirm-buttons">
-                <button 
+                <button
                   onClick={confirmNewChat}
                   className="confirm-yes-btn"
                 >
                   Yes, New Chat
                 </button>
-                <button 
+                <button
                   onClick={() => setShowConfirmDialog(false)}
                   className="confirm-no-btn"
                 >

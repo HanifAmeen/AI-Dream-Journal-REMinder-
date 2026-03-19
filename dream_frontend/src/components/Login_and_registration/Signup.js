@@ -23,17 +23,25 @@ function Signup() {
       return;
     }
 
-    alert("Account created! You can now log in.");
+    // 🔥 Handle verification ON vs OFF properly
+    if (data.verification_required) {
+      alert(
+        `Account created! A verification link has been sent (check console for now) 📩\n\nEmail: ${email}`
+      );
+    } else {
+      alert("Account created! You can now log in.");
+    }
+
+    // Redirect to login either way
     window.location.href = "/login";
   };
 
   return (
-    <div className="auth-page"> {/* Full background wrapper */}
-      <div className="auth-container"> {/* Glass card */}
+    <div className="auth-page">
+      <div className="auth-container">
         <h2>Signup</h2>
 
         <form onSubmit={submitSignup} className="auth-form">
-          
           <input
             type="email"
             placeholder="Email"
@@ -42,7 +50,6 @@ function Signup() {
             onChange={(e) => setEmail(e.target.value)}
           />
 
-       
           <input
             type="text"
             placeholder="Username"
@@ -51,7 +58,6 @@ function Signup() {
             onChange={(e) => setUsername(e.target.value)}
           />
 
-        
           <input
             type="password"
             placeholder="Password"

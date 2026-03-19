@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import "./auth.css";
 
 function Login() {
@@ -9,6 +9,18 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState(""); // signup only
+
+  const location = useLocation();
+
+  /* -----------------------
+      HANDLE EMAIL VERIFIED REDIRECT
+  ------------------------ */
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("verified") === "true") {
+      alert("Email verified successfully 🎉 You can now log in.");
+    }
+  }, [location.search]);
 
   /* -----------------------
       LOGIN SUBMIT
@@ -23,15 +35,19 @@ function Login() {
     });
 
     const data = await res.json();
+
     if (!res.ok) {
-      alert(data.error || "Login failed");
+      if (res.status === 403) {
+        alert("Please verify your email before logging in 📩");
+      } else {
+        alert(data.error || "Login failed");
+      }
       return;
     }
 
     localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(data.user));
     localStorage.setItem("justLoggedIn", "true");
-
 
     window.location.href = "/home";
   };
@@ -49,19 +65,29 @@ function Login() {
     });
 
     const data = await res.json();
+
     if (!res.ok) {
       alert(data.error || "Signup failed");
       return;
     }
 
-    alert("Account created! You can now log in.");
+    // 🔥 Handle verification ON vs OFF
+    if (data.verification_required) {
+      alert("Account created! Please check your email to verify your account 📩");
+    } else {
+      alert("Account created! You can now log in.");
+    }
+
     setMode("login");
   };
 
   return (
     <div className="auth-page">
-      <div className={`auth-container form-wrapper ${mode === "signup" ? "morph-signup" : "morph-login"}`}>
-
+      <div
+        className={`auth-container form-wrapper ${
+          mode === "signup" ? "morph-signup" : "morph-login"
+        }`}
+      >
         {/* ----------------------
              LOGIN FORM
         ------------------------ */}
@@ -93,7 +119,9 @@ function Login() {
                 className="switch-btn"
                 onClick={() => setMode("signup")}
               >
-                Don’t have an account?<br />Create one
+                Don't have an account?
+                <br />
+                Create one
               </button>
             </div>
           </div>
@@ -106,8 +134,6 @@ function Login() {
           <div className="form-content fade-slide-in">
             <h2>Signup</h2>
             <form onSubmit={submitSignup} className="auth-form">
-
-             
               <input
                 type="email"
                 placeholder="Email"
@@ -116,7 +142,6 @@ function Login() {
                 onChange={(e) => setEmail(e.target.value)}
               />
 
-            
               <input
                 type="text"
                 placeholder="Username"
@@ -125,7 +150,6 @@ function Login() {
                 onChange={(e) => setUsername(e.target.value)}
               />
 
-            
               <input
                 type="password"
                 placeholder="Password"
@@ -142,12 +166,13 @@ function Login() {
                 className="switch-btn"
                 onClick={() => setMode("login")}
               >
-                Already have an account?<br />Sign in
+                Already have an account?
+                <br />
+                Sign in
               </button>
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
