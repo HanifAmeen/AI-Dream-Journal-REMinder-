@@ -34,26 +34,27 @@ import jwt
 import bcrypt
 from functools import wraps
 
-from scene_splitter import split_into_scenes
-from prompt_builder import build_prompt
-from image_generator import generate_image
-from chatbot_api import chatbot_bp
+from ai_dream_journal.dream_Visualizer.scene_splitter import split_into_scenes
+from ai_dream_journal.dream_Visualizer.prompt_builder import build_prompt
+from ai_dream_journal.dream_Visualizer.image_generator import generate_image
+
+from ai_dream_journal.Chatbot.chatbot_api import chatbot_bp  # assuming this is in root (leave as-is if true)
 
 from sentence_transformers import SentenceTransformer
 
-from trauma_signal import trauma_linked_score
-from symbol_insight import build_symbol_insight
-from resolve_dynamics import resolve_symbol_emotion_dynamics
-from interpretation_generator import generate_interpretation
-from emotion_detector import (
+from ai_dream_journal.dream_Analyzer.trauma_signal import trauma_linked_score
+from ai_dream_journal.dream_Analyzer.symbol_insight import build_symbol_insight
+from ai_dream_journal.dream_Analyzer.resolve_dynamics import resolve_symbol_emotion_dynamics
+from ai_dream_journal.dream_Analyzer.interpretation_generator import generate_interpretation
+from ai_dream_journal.dream_Analyzer.emotion_detector import (
     detect_emotion_with_scores,
     detect_emotion_trajectory
 )
-from confidence_utils import (
+from ai_dream_journal.dream_Analyzer.confidence_utils import (
     compute_symbol_confidence,
     compute_overall_confidence
 )
-from dream_Analyzer.dream_similarity import DreamSimilarity
+from ai_dream_journal.dream_Analyzer.dream_similarity import DreamSimilarity
 
 # Download NLTK data (one-time)
 try:
@@ -277,7 +278,7 @@ app.config["MAIL_PORT"] = 587
 app.config["MAIL_USE_TLS"] = True
 
 app.config["MAIL_USERNAME"] = "reminderapp2026@gmail.com"
-app.config["MAIL_PASSWORD"] = "jodlknbyidzunnyk"  # ⚠️ NO SPACES
+app.config["MAIL_PASSWORD"] = "jodlknbyidzunnyk"  
 
 app.config["MAIL_DEFAULT_SENDER"] = "reminderapp2026@gmail.com"
 
