@@ -166,7 +166,10 @@ def is_living_entity(word):
 # 📦 LOAD SYMBOL DATA FROM CSV
 # -------------------------------------------------
 DATASETS_DIR = BASE_DIR / "datasets"
-CSV_PATH = r"C:\\Users\\amjad\\Downloads\\Research Papers 2025\\Dream Journal\\AI -Dream Journal APP\\ai_dream_journal\\datasets\\cleaned_dream_interpretations.csv"
+
+
+BASE_DIR = Path(__file__).resolve().parent
+CSV_PATH = BASE_DIR / "datasets" / "cleaned_dream_interpretations.csv"
 
 if not os.path.exists(CSV_PATH):
     raise FileNotFoundError(f"Missing file: {CSV_PATH}")
