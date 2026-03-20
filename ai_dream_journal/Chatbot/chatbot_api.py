@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from chatbot_engine import ChatbotEngine
-from ai_dream_journal.auth_utils import auth_required
+from auth_utils import auth_required
 
 
 chatbot_bp = Blueprint("chatbot", __name__)

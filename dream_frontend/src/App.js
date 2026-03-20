@@ -21,6 +21,7 @@ import ChatbotPanel from "./components/Chatbot/ChatbotPanel";
 import Footer from "./components/Common/Footer/footer";
 
 import { authHeaders, logout } from "./auth";
+import API_URL from "./config"; // ✅ NEW
 import "./App.css";
 
 function App() {
@@ -38,7 +39,7 @@ function App() {
   --------------------------------------------------*/
   const fetchDreams = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:5000/get_dreams", {
+      const res = await fetch(`${API_URL}/get_dreams`, { // ✅ UPDATED
         method: "GET",
         headers: authHeaders(),
       });
@@ -56,18 +57,18 @@ function App() {
   };
 
   /* -------------------------------------------------
-     Add Dream  ⭐ FIXED HERE
+     Add Dream
   --------------------------------------------------*/
   const addDream = async ({ title, content, mood, use_profile }) => {
     try {
-      const res = await fetch("http://127.0.0.1:5000/add_dream", {
+      const res = await fetch(`${API_URL}/add_dream`, { // ✅ UPDATED
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify({
           title,
           content,
           mood,
-          use_profile   // ⭐ NOW SENT TO BACKEND
+          use_profile
         }),
       });
 
@@ -93,7 +94,7 @@ function App() {
   --------------------------------------------------*/
   const deleteDream = async (id) => {
     try {
-      await fetch(`http://127.0.0.1:5000/delete_dream/${id}`, {
+      await fetch(`${API_URL}/delete_dream/${id}`, { // ✅ UPDATED
         method: "DELETE",
         headers: authHeaders(),
       });
