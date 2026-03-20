@@ -2,8 +2,8 @@ import React from "react";
 import "./LandingPage.css";
 import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Logo from "../../Assets/Reminder_Logo1_Notext.png";
 
+import logo from "../../image_assets/Reminder_Logo1_Notext.png";
 
 
 function LandingPage () {
@@ -100,7 +100,7 @@ function LandingPage () {
   <div className="stars2"></div>
 
   <div className="header-section">
-    <img src={Logo} alt="Logo" className="landing-logo" />
+    <img src={logo} alt="Logo" className="landing-logo" />
     <h1>REMinder</h1>
     <p className="subtitle">Dream analysis</p>
   </div>
