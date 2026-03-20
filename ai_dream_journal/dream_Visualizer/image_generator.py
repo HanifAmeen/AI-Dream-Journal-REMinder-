@@ -1,7 +1,31 @@
-from diffusers import StableDiffusionPipeline
-import torch
+import os
 from pathlib import Path
-from prompt_builder import get_negative_prompt
+import torch
+
+# ============================================================
+# 🔥 IMAGE GENERATION TOGGLE
+# ============================================================
+# HOW TO USE:
+#
+# 👉 LOCAL (enable images):
+# Windows:
+#   set ENABLE_IMAGE_GEN=true
+#   python -m ai_dream_journal.app
+#
+# 👉 RENDER (keep OFF):
+#   Do NOT set it OR set:
+#   ENABLE_IMAGE_GEN=false
+#
+# ⚠️ IMPORTANT:
+# Turning this ON in Render will likely crash the app (no GPU)
+# ============================================================
+
+ENABLE_IMAGE_GEN = os.environ.get("ENABLE_IMAGE_GEN", "false") == "true"
+
+# Only import heavy libraries IF enabled
+if ENABLE_IMAGE_GEN:
+    from diffusers import StableDiffusionPipeline
+    from ai_dream_journal.dream_visualizer.prompt_builder import get_negative_prompt
 
 # ------------------------------------
 # CPU THREAD OPTIMIZATION
@@ -17,23 +41,36 @@ OUTPUT_DIR = BASE_DIR / "dream_output"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 # ------------------------------------
-# LOAD MODEL (CPU SAFE CONFIG)
+# LOAD MODEL (ONLY IF ENABLED)
 # ------------------------------------
-pipe = StableDiffusionPipeline.from_pretrained(
-    "stabilityai/sd-turbo",
-    torch_dtype=torch.float32,
-    safety_checker=None
-)
+pipe = None
 
-pipe = pipe.to("cpu")
+if ENABLE_IMAGE_GEN:
+    print("[INIT] Image generation ENABLED")
+    print("[INIT] Loading Stable Diffusion model...")
 
-# Memory optimizations
-pipe.enable_attention_slicing()
+    pipe = StableDiffusionPipeline.from_pretrained(
+        "stabilityai/sd-turbo",
+        torch_dtype=torch.float32,
+        safety_checker=None
+    )
+
+    pipe = pipe.to("cpu")
+    pipe.enable_attention_slicing()
+
+    print("[INIT] Model loaded successfully")
+else:
+    print("[INIT] Image generation DISABLED (safe mode)")
 
 # ------------------------------------
-# IMAGE GENERATION
+# IMAGE GENERATION FUNCTION
 # ------------------------------------
 def generate_image(prompt, index):
+
+    # If disabled → skip safely
+    if not ENABLE_IMAGE_GEN:
+        print("[IMAGE GEN] Skipped (disabled)")
+        return None
 
     filename = OUTPUT_DIR / f"scene_{index}.png"
 
