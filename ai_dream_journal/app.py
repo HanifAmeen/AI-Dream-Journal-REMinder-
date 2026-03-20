@@ -34,27 +34,66 @@ import jwt
 import bcrypt
 from functools import wraps
 
-from ai_dream_journal.dream_Visualizer.scene_splitter import split_into_scenes
-from ai_dream_journal.dream_Visualizer.prompt_builder import build_prompt
-from ai_dream_journal.dream_Visualizer.image_generator import generate_image
+# ============================================================
+# 🔥 LAZY IMPORT WRAPPERS (prevents startup blocking)
+# ============================================================
 
-from ai_dream_journal.Chatbot.chatbot_api import chatbot_bp  # assuming this is in root (leave as-is if true)
+def get_scene_splitter():
+    from ai_dream_journal.dream_Visualizer.scene_splitter import split_into_scenes
+    return split_into_scenes
 
-from sentence_transformers import SentenceTransformer
+def get_prompt_builder():
+    from ai_dream_journal.dream_Visualizer.prompt_builder import build_prompt
+    return build_prompt
 
-from ai_dream_journal.dream_Analyzer.trauma_signal import trauma_linked_score
-from ai_dream_journal.dream_Analyzer.symbol_insight import build_symbol_insight
-from ai_dream_journal.dream_Analyzer.resolve_dynamics import resolve_symbol_emotion_dynamics
-from ai_dream_journal.dream_Analyzer.interpretation_generator import generate_interpretation
-from ai_dream_journal.dream_Analyzer.emotion_detector import (
-    detect_emotion_with_scores,
-    detect_emotion_trajectory
-)
-from ai_dream_journal.dream_Analyzer.confidence_utils import (
-    compute_symbol_confidence,
-    compute_overall_confidence
-)
-from ai_dream_journal.dream_Analyzer.dream_similarity import DreamSimilarity
+def get_image_generator():
+    from ai_dream_journal.dream_Visualizer.image_generator import generate_image
+    return generate_image
+
+
+def get_chatbot_bp():
+    from ai_dream_journal.Chatbot.chatbot_api import chatbot_bp
+    return chatbot_bp
+
+
+def get_sentence_model():
+    from sentence_transformers import SentenceTransformer
+    return SentenceTransformer
+
+
+def get_trauma_signal():
+    from ai_dream_journal.dream_Analyzer.trauma_signal import trauma_linked_score
+    return trauma_linked_score
+
+def get_symbol_insight():
+    from ai_dream_journal.dream_Analyzer.symbol_insight import build_symbol_insight
+    return build_symbol_insight
+
+def get_resolve_dynamics():
+    from ai_dream_journal.dream_Analyzer.resolve_dynamics import resolve_symbol_emotion_dynamics
+    return resolve_symbol_emotion_dynamics
+
+def get_interpretation():
+    from ai_dream_journal.dream_Analyzer.interpretation_generator import generate_interpretation
+    return generate_interpretation
+
+def get_emotion_detector():
+    from ai_dream_journal.dream_Analyzer.emotion_detector import (
+        detect_emotion_with_scores,
+        detect_emotion_trajectory
+    )
+    return detect_emotion_with_scores, detect_emotion_trajectory
+
+def get_confidence_utils():
+    from ai_dream_journal.dream_Analyzer.confidence_utils import (
+        compute_symbol_confidence,
+        compute_overall_confidence
+    )
+    return compute_symbol_confidence, compute_overall_confidence
+
+def get_dream_similarity():
+    from ai_dream_journal.dream_Analyzer.dream_similarity import DreamSimilarity
+    return DreamSimilarity
 
 # Download NLTK data (one-time)
 try:
@@ -145,6 +184,7 @@ symbol_names = (
 print(f"Loaded {len(symbol_names)} lemmatized symbols from dataset")
 
 # ✅ MODEL + EMBEDDINGS
+SentenceTransformer = get_sentence_model()
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 symbol_embeddings = model.encode(symbol_names, normalize_embeddings=True)
 print(f"Symbol embeddings shape: {symbol_embeddings.shape}")
@@ -171,6 +211,7 @@ if DREAMBANK_PATH.exists() and DREAMBANK_EMBED_PATH.exists():
     print(f"✅ Loaded {len(dreambank_texts)} DreamBank dreams")
     
     # Initialize similarity engine
+    DreamSimilarity = get_dream_similarity()
     dream_similarity_engine = DreamSimilarity(
         model=model,
         dreambank_embeddings=dreambank_embeddings,
@@ -959,6 +1000,7 @@ def delete_dream(dream_id):
     db.session.commit()
     return jsonify({"message": "Dream deleted"})
 
+chatbot_bp = get_chatbot_bp()
 app.register_blueprint(chatbot_bp)
 
 if __name__ == "__main__":
