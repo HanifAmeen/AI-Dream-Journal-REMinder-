@@ -3,7 +3,7 @@ import "./LandingPage.css";
 import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-import logo from "../../image_assets/Reminder_Logo1_Notext.png";
+import logo from "../../Assets/Reminder_Logo1_Notext.png";
 
 
 function LandingPage () {
