@@ -14,7 +14,7 @@ import uuid  # ✅ MOVED UP - NEEDED FOR BATCHING
 import numpy as np  # MOVED UP - NEEDED FOR DREAMBANK
 from flask import redirect
 from flask_mail import Mail, Message
-
+import requests
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -1025,12 +1025,57 @@ def add_dream():
         return jsonify({"error": "Dream content required"}), 400
 
     try:
-        # ✅ CRITICAL: Pass user_id and use_profile to analysis function
-        result = analyze_dream_runtime(content, request.user_id, use_profile)
-    except Exception:
-        traceback.print_exc()
-        return jsonify({"error": "Dream analysis failed"}), 500
+        
+       
+        
+        # ✅ NEW (ngrok offload) - Replace analyze_dream_runtime with API call
+        print("🌐 Offloading dream analysis to ngrok analyzer...")
+        response = requests.post(
+            "https://nonchromatic-collin-felly.ngrok-free.dev", 
+            json={
+                "dream": content,
+                "user_id": request.user_id,
+                "use_profile": use_profile
+            },
+            timeout=60,  # 60 second timeout for heavy analysis
+            headers={"Content-Type": "application/json"}
+        )
+        
+        if response.status_code != 200:
+            print(f"❌ Ngrok analyzer failed: {response.status_code} - {response.text}")
+            # Fallback to local analysis if ngrok fails
+            print("🔄 Falling back to local analyze_dream_runtime...")
+            result = analyze_dream_runtime(content, request.user_id, use_profile)
+        else:
+            result = response.json()
+            print("✅ Ngrok analysis successful")
 
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Ngrok request failed: {e}")
+        # Fallback to local analysis if network fails
+        print("🔄 Falling back to local analyze_dream_runtime...")
+        result = analyze_dream_runtime(content, request.user_id, use_profile)
+    except Exception as e:
+        print(f"❌ Analysis failed: {e}")
+        traceback.print_exc()
+        # Safe fallback result
+        result = {
+            "dominant_emotion": "neutral",
+            "trajectory": {},
+            "symbols": {},
+            "symbol_prominence": {},
+            "avg_symbol_prominence": 0.0,
+            "interpretation": "Analysis service temporarily unavailable. The dream reflects complex emotional processing.",
+            "dream_similarity": 0.0,
+            "similar_dream_example": None,
+            "confidence": {"symbol": 0.0, "overall": 0.0},
+            "trauma_score": 0.0,
+            "trauma_level": "Low",
+            "analysis_version": "fallback_v1",
+            "user_profile_used": False
+        }
+
+    # ✅ REST OF ROUTE UNCHANGED - Save to DB
     dream = Dream(
         title=title,
         content=content,
@@ -1045,7 +1090,7 @@ def add_dream():
         trauma_level=result.get("trauma_level", "Low"),
         analysis_version=result["analysis_version"],
         user_profile_used=result["user_profile_used"],
-        dream_similarity=result.get("dream_similarity", 0.0),  # ✅ NEW: NOW STORED IN DB
+        dream_similarity=result.get("dream_similarity", 0.0),
         user_id=request.user_id
     )
 
@@ -1053,10 +1098,10 @@ def add_dream():
     db.session.commit()
 
     return jsonify({
-        "message": "Dream saved with personalized interpretation + DreamBank similarity + LAZY MODEL",
+        "message": "Dream saved with analysis (ngrok offloaded)",
         "profile_used": result.get("user_profile_used", False),
-        "dream_similarity": result.get("dream_similarity",
-        0.0)  # ✅ NEW
+        "dream_similarity": result.get("dream_similarity", 0.0),
+        "analysis_version": result.get("analysis_version", "unknown")
     }), 201
 
 
@@ -1128,4 +1173,3 @@ if __name__ == "__main__":
         use_reloader=False,
         threaded=True
     )
-
