@@ -1109,6 +1109,10 @@ def delete_dream(dream_id):
 chatbot_bp = get_chatbot_bp()
 app.register_blueprint(chatbot_bp)
 
+@app.route("/")
+def home():
+    return "REMinder API is running 🚀"
+
 
 if __name__ == "__main__":
     import os
