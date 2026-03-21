@@ -89,8 +89,9 @@ def get_confidence_utils():
     return compute_symbol_confidence, compute_overall_confidence
 
 def get_dream_similarity():
-    from ai_dream_journal.dream_Analyzer.dream_similarity import DreamSimilarity
-    return DreamSimilarity
+    print("⚠️ DreamSimilarity disabled (manually disabled)")
+    return None
+    
 
 # Download NLTK data (one-time)
 try:
