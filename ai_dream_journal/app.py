@@ -14,10 +14,8 @@ import uuid  # ✅ MOVED UP - NEEDED FOR BATCHING
 import numpy as np  # MOVED UP - NEEDED FOR DREAMBANK
 from flask import redirect
 from flask_mail import Mail, Message
-import requests
 
 BASE_DIR = Path(__file__).resolve().parent
-
 
 ANALYZER_DIR = BASE_DIR / "dream_Analyzer"
 VISUALIZER_DIR = BASE_DIR / "dream_visualizer"
@@ -25,7 +23,6 @@ CHATBOT_DIR = BASE_DIR / "Chatbot"
 sys.path.insert(0, str(CHATBOT_DIR))
 sys.path.insert(0, str(ANALYZER_DIR))
 sys.path.insert(0, str(VISUALIZER_DIR))
-
 
 import json
 import traceback
@@ -37,81 +34,26 @@ import jwt
 import bcrypt
 from functools import wraps
 
+from scene_splitter import split_into_scenes
+from prompt_builder import build_prompt
+from image_generator import generate_image
+from chatbot_api import chatbot_bp
 
-# ============================================================
-# 🔥 LAZY IMPORT WRAPPERS (prevents startup blocking)
-# ============================================================
+from sentence_transformers import SentenceTransformer
 
-
-def get_scene_splitter():
-    from ai_dream_journal.dream_Visualizer.scene_splitter import split_into_scenes
-    return split_into_scenes
-
-
-def get_prompt_builder():
-    from ai_dream_journal.dream_Visualizer.prompt_builder import build_prompt
-    return build_prompt
-
-
-def get_image_generator():
-    from ai_dream_journal.dream_Visualizer.image_generator import generate_image
-    return generate_image
-
-
-def get_chatbot_bp():
-    from ai_dream_journal.Chatbot.chatbot_api import chatbot_bp
-    return chatbot_bp
-
-
-def get_sentence_model():
-    try:
-        from sentence_transformers import SentenceTransformer
-        return SentenceTransformer
-    except:
-        print("⚠️ sentence-transformers not installed")
-        return None
-
-
-def get_trauma_signal():
-    from ai_dream_journal.dream_Analyzer.trauma_signal import trauma_linked_score
-    return trauma_linked_score
-
-
-def get_symbol_insight():
-    from ai_dream_journal.dream_Analyzer.symbol_insight import build_symbol_insight
-    return build_symbol_insight
-
-
-def get_resolve_dynamics():
-    from ai_dream_journal.dream_Analyzer.resolve_dynamics import resolve_symbol_emotion_dynamics
-    return resolve_symbol_emotion_dynamics
-
-
-def get_interpretation():
-    from ai_dream_journal.dream_Analyzer.interpretation_generator import generate_interpretation
-    return generate_interpretation
-
-
-def get_emotion_detector():
-    from ai_dream_journal.dream_Analyzer.emotion_detector import (
-        detect_emotion_with_scores,
-        detect_emotion_trajectory
-    )
-    return detect_emotion_with_scores, detect_emotion_trajectory
-
-
-def get_confidence_utils():
-    from ai_dream_journal.dream_Analyzer.confidence_utils import (
-        compute_symbol_confidence,
-        compute_overall_confidence
-    )
-    return compute_symbol_confidence, compute_overall_confidence
-
-
-def get_dream_similarity():
-    print("⚠️ DreamSimilarity disabled (manually disabled)")
-    return None
-
+from trauma_signal import trauma_linked_score
+from symbol_insight import build_symbol_insight
+from resolve_dynamics import resolve_symbol_emotion_dynamics
+from interpretation_generator import generate_interpretation
+from emotion_detector import (
+    detect_emotion_with_scores,
+    detect_emotion_trajectory
+)
+from confidence_utils import (
+    compute_symbol_confidence,
+    compute_overall_confidence
+)
+from dream_Analyzer.dream_similarity import DreamSimilarity
 
 # Download NLTK data (one-time)
 try:
@@ -122,8 +64,8 @@ except LookupError:
     nltk.download('wordnet')
     nltk.download('omw-1.4')
 
-
 lemmatizer = WordNetLemmatizer()
+
 
 
 # -------------------------------------------------
@@ -137,12 +79,10 @@ def ensure_string(value):
     except Exception:
         return str(value)
 
-
 def ensure_json(value):
     if isinstance(value, dict):
         return value
     return {}
-
 
 # -------------------------------------------------
 # 🔧 FIX #2 - EXPANDED WEAK SYMBOLS FILTER (100+ entries) ✅ APPLIED
@@ -150,7 +90,6 @@ def ensure_json(value):
 WEAK_SYMBOLS = {
     # (intentionally left commented out / empty in your snippet)
 }
-
 
 # -------------------------------------------------
 # 📦 AUTOMATIC SYMBOL CLASSIFICATION (SCALABLE ✅)
@@ -164,12 +103,10 @@ ABSTRACT_SYMBOLS = {
     "role_shift", "evaluation"
 }
 
-
 RESOLUTION_PHRASES = {
     'escaped', 'safe', 'relieved', 'clear', 'outside', 'calm',
     'woke up', 'found way', 'finally', 'peace', 'home'
 }
-
 
 # -------------------------------------------------
 # 🧬 LIVING ENTITY DETECTOR (NEW)
@@ -185,17 +122,14 @@ def is_living_entity(word):
                 return True
     return False
 
-
 # -------------------------------------------------
 # 📦 LOAD SYMBOL DATA FROM CSV
 # -------------------------------------------------
 DATASETS_DIR = BASE_DIR / "datasets"
-CSV_PATH = BASE_DIR / "datasets" / "cleaned_dream_interpretations.csv"
-
+CSV_PATH = r"C:\\Users\\amjad\\Downloads\\Research Papers 2025\\Dream Journal\\AI -Dream Journal APP\\ai_dream_journal\\datasets\\cleaned_dream_interpretations.csv"
 
 if not os.path.exists(CSV_PATH):
     raise FileNotFoundError(f"Missing file: {CSV_PATH}")
-
 
 df_symbols = pd.read_csv(CSV_PATH)
 symbol_names = (
@@ -207,100 +141,49 @@ symbol_names = (
     .tolist()
 )
 
-
 print(f"Loaded {len(symbol_names)} lemmatized symbols from dataset")
 
-
-# 🔥 STEP 2 — ADD LAZY LOADER ✅ IMPLEMENTED
-model = None
-symbol_embeddings = None
-
-
-# 🔴 STEP 3 — PROTECT get_model_and_embeddings()
-def get_model_and_embeddings():
-    global model, symbol_embeddings
-
-    if model is None:
-        try:
-            print("[AI] Loading SentenceTransformer model...")
-            SentenceTransformer = get_sentence_model()
-
-            if SentenceTransformer is None:
-                print("⚠️ Skipping model load")
-                return None, None
-
-            model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
-
-            print("[AI] Encoding symbol embeddings...")
-            symbol_embeddings = model.encode(symbol_names, normalize_embeddings=True)
-
-            print("✅ Model + embeddings ready")
-
-        except Exception as e:
-            print("⚠️ Model disabled:", e)
-            model = None
-            symbol_embeddings = None
-
-    return model, symbol_embeddings
-
+# ✅ MODEL + EMBEDDINGS
+model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+symbol_embeddings = model.encode(symbol_names, normalize_embeddings=True)
+print(f"Symbol embeddings shape: {symbol_embeddings.shape}")
 
 # ✅ FIXED: Proper set operations for CONCRETE_SYMBOLS
 CONCRETE_SYMBOLS = set(symbol_names) - set(ABSTRACT_SYMBOLS)
+
 print(f"Concrete symbols count: {len(CONCRETE_SYMBOLS)}")
 
-
 # -------------------------------------------------
-# 🌙 DREAM SIMILARITY DATA  ✅ NEW - FIXED WITH LAZY LOADING
+# 🌙 DREAM SIMILARITY DATA  ✅ NEW
 # -------------------------------------------------
 DREAMBANK_PATH = BASE_DIR / "datasets" / "dreambank_processed_full.csv"
 DREAMBANK_EMBED_PATH = BASE_DIR / "datasets" / "dreambank_embeddings.npy"
 
-
 print("Loading DreamBank dataset for similarity search...")
 
-
-dreambank_df = None
-dream_similarity_engine = None
-
-
-# 🔴 STEP 2 — Fix DreamBank initialization
 if DREAMBANK_PATH.exists() and DREAMBANK_EMBED_PATH.exists():
     dreambank_df = pd.read_csv(DREAMBANK_PATH)
     dreambank_ids = dreambank_df["number"].tolist()
     dreambank_texts = dreambank_df["semantic_text"].astype(str).tolist()
     dreambank_embeddings = np.load(DREAMBANK_EMBED_PATH)
-
+    
     print(f"✅ Loaded {len(dreambank_texts)} DreamBank dreams")
-
-    # Initialize similarity engine (model loaded lazily)
-    DreamSimilarity = get_dream_similarity()
-
-    if DreamSimilarity:
-        model, _ = get_model_and_embeddings()
-        dream_similarity_engine = DreamSimilarity(
-            model=model,
-            dreambank_embeddings=dreambank_embeddings,
-            dreambank_texts=dreambank_texts
-        )
-    else:
-        dream_similarity_engine = None
+    
+    # Initialize similarity engine
+    dream_similarity_engine = DreamSimilarity(
+        model=model,
+        dreambank_embeddings=dreambank_embeddings,
+        dreambank_texts=dreambank_texts
+    )
 else:
     print("⚠️ DreamBank files not found - similarity search disabled")
     dream_similarity_engine = None
 
-
 # -------------------------------------------------
-# 🧠 ADVANCED SCORING WITH ALL 3 FIXES + LAZY LOADING ✅
+# 🧠 ADVANCED SCORING WITH ALL 3 FIXES ✅
 # -------------------------------------------------
 def compute_hybrid_symbol_scores(dream_text: str):
-    """🔧 ALL FIXES: Reduced living boost + Weak filter + Top-200 optimization + LAZY LOADING"""
-    # 🔴 STEP 4 — PROTECT THIS FUNCTION TOO
-    model, symbol_embeddings = get_model_and_embeddings()
-
-    if model is None or symbol_embeddings is None:
-        print("⚠️ Skipping semantic scoring (model unavailable)")
-        return []
-
+    """🔧 ALL FIXES: Reduced living boost + Weak filter + Top-200 optimization"""
     dream_embedding = model.encode(dream_text, normalize_embeddings=True)
     embedding_scores = symbol_embeddings @ dream_embedding
 
@@ -372,19 +255,16 @@ def compute_hybrid_symbol_scores(dream_text: str):
     filtered = [(s, v) for s, v in hybrid_scores if v > 0.35]
     return sorted(filtered, key=lambda x: x[1], reverse=True)
 
-
 def detect_resolution(text: str):
     """Detect narrative resolution"""
     text_lower = text.lower()
     resolution_count = sum(1 for phrase in RESOLUTION_PHRASES if phrase in text_lower)
     return resolution_count > 0
 
-
 # -------------------------------------------------
 # 🚀 FLASK + DB SETUP
 # -------------------------------------------------
 SECRET_KEY = os.environ.get("REMINDER_SECRET_KEY", "CHANGE_THIS_SECRET")
-
 
 app = Flask(__name__)
 CORS(app)
@@ -392,22 +272,17 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{BASE_DIR / 'dreams.db'}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["EMAIL_VERIFICATION_ENABLED"] = False
 
-
 app.config["MAIL_SERVER"] = "smtp.gmail.com"
 app.config["MAIL_PORT"] = 587
 app.config["MAIL_USE_TLS"] = True
 
-
 app.config["MAIL_USERNAME"] = "reminderapp2026@gmail.com"
-app.config["MAIL_PASSWORD"] = "jodlknbyidzunnyk" 
-
+app.config["MAIL_PASSWORD"] = "jodlknbyidzunnyk"  
 
 app.config["MAIL_DEFAULT_SENDER"] = "reminderapp2026@gmail.com"
 
-
 db = SQLAlchemy(app)
 mail = Mail(app)
-
 
 # -------------------------------------------------
 # ✅ UPDATED MODELS WITH DREAM_SIMILARITY
@@ -425,7 +300,6 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_verified = db.Column(db.Boolean, default=False)
     verification_token = db.Column(db.String(200))
-
 
 class Dream(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -446,14 +320,12 @@ class Dream(db.Model):
     dream_similarity = db.Column(db.Float, default=0.0)  # ✅ NEW COLUMN ADDED
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
-
 class DreamImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     image_url = db.Column(db.String(300))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     dream_batch_id = db.Column(db.String(36))
-
 
 # -------------------------------------------------
 # 🏗️ UPDATED MIGRATION WITH DREAM_SIMILARITY
@@ -471,6 +343,8 @@ def migrate_database():
                         "ALTER TABLE dream_image ADD COLUMN dream_batch_id VARCHAR(36)"
                     )
                     print("✅ Migration complete!")
+                else:
+                    print("✅ dream_batch_id column already exists")
 
                 # ✅ NEW: Add profile columns if missing
                 user_columns = [row[1] for row in conn.exec_driver_sql("PRAGMA table_info(user)").fetchall()]
@@ -504,14 +378,12 @@ def migrate_database():
     except Exception as e:
         print(f"❌ Migration failed: {e}")
 
-
 # -------------------------------------------------
 # 🧠 INIT DB WITH MIGRATION
 # -------------------------------------------------
 with app.app_context():
     migrate_database()
     db.create_all()
-
 
 # -------------------------------------------------
 # AUTH HELPERS
@@ -523,13 +395,11 @@ def make_token(user_id):
     }
     return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 
-
 def decode_token(token):
     try:
         return jwt.decode(token, SECRET_KEY, algorithms=["HS256"])["user_id"]
     except Exception:
         return None
-
 
 def auth_required(f):
     @wraps(f)
@@ -545,7 +415,6 @@ def auth_required(f):
         request.user_id = user_id
         return f(*args, **kwargs)
     return wrapper
-
 
 # -------------------------------------------------
 # PROFILE ROUTES
@@ -581,7 +450,6 @@ def update_profile():
     db.session.commit()
     return jsonify({"message": "Profile saved successfully"})
 
-
 @app.route("/get_profile", methods=["GET"])
 @auth_required
 def get_profile():
@@ -598,12 +466,11 @@ def get_profile():
         "religion": user.religion
     })
 
-
 # -------------------------------------------------
 # 🧠 ENHANCED ANALYSIS WITH PERSONALIZATION + DREAMBANK SIMILARITY ✅
 # -------------------------------------------------
 def analyze_dream_runtime(dream_text: str, user_id: int, use_profile: bool = True):
-    """🔧 ALL FIXES + 🌙 DREAMBANK SIMILARITY + LAZY LOADING"""
+    """🔧 ALL FIXES + 🌙 DREAMBANK SIMILARITY"""
     try:
         # ✅ CRITICAL: Get user profile for personalization (MODERNIZED)
         user_profile = None
@@ -623,16 +490,15 @@ def analyze_dream_runtime(dream_text: str, user_id: int, use_profile: bool = Tru
         else:
             print("ℹ️ use_profile=False, skipping user profile personalization")
 
-        raw_dominant, emotion_scores, emotion_conf = get_emotion_detector()[0](dream_text)
+        raw_dominant, emotion_scores, emotion_conf = detect_emotion_with_scores(dream_text)
         
         # -------------------------------------------------
-        # 🌙 DREAM SIMILARITY  ✅ NEW - NOW LAZY SAFE
+        # 🌙 DREAM SIMILARITY  ✅ NEW
         # -------------------------------------------------
         top_similarity = 0.0
         similar_dream_text = None
         
         if dream_similarity_engine:
-            model, _ = get_model_and_embeddings()  # ✅ Ensure model is loaded
             similar_dreams = dream_similarity_engine.find_similar_dreams(dream_text, top_k=1)
             if similar_dreams:
                 top_similarity = similar_dreams[0]["similarity_score"]
@@ -641,14 +507,14 @@ def analyze_dream_runtime(dream_text: str, user_id: int, use_profile: bool = Tru
         else:
             print("⚠️ DreamBank similarity disabled")
 
-        trajectory = get_emotion_detector()[1](dream_text)
+        trajectory = detect_emotion_trajectory(dream_text)
         dominant_emotion = trajectory.get("overall_emotion", raw_dominant)
 
         ranked_symbols = compute_hybrid_symbol_scores(dream_text)
         raw_symbols = {s: float(v) for s, v in ranked_symbols[:10]}
 
         has_resolution = detect_resolution(dream_text)
-        insight = get_symbol_insight()(raw_symbols, dominant_emotion, dream_text)
+        insight = build_symbol_insight(raw_symbols, dominant_emotion, dream_text)
         grounded_symbols = insight.get("symbol_scores", {})
 
         if not grounded_symbols:
@@ -700,19 +566,19 @@ def analyze_dream_runtime(dream_text: str, user_id: int, use_profile: bool = Tru
                 else:
                     avg_symbol_prominence = 0.0
 
-        print("\n🎯 NORMALIZED SYMBOL SCORES (v11 - LAZY LOADED):")
+        print("\n🎯 NORMALIZED SYMBOL SCORES (v10 - ALL FIXES):")
         for s, v in top_symbols.items():
             print(f"  {s:<12} {v:>5.2f}")
         print(f"  📊 Avg Prominence: {avg_symbol_prominence:.1f}%")
 
-        dynamics = get_resolve_dynamics()(insight, dream_text)
+        dynamics = resolve_symbol_emotion_dynamics(insight, dream_text)
         dynamic_names = [d["dynamic"] for d in dynamics if isinstance(d, dict)]
 
         emotion_distribution = trajectory.get("emotion_distribution", {"neutral": 1.0})
         threat_count = sum(1 for d in dynamic_names if "threat" in d)
         repeated_threats = threat_count >= 2
 
-        trauma_score, trauma_level = get_trauma_signal()(
+        trauma_score, trauma_level = trauma_linked_score(
             emotion_scores=emotion_distribution,
             dynamics=dynamic_names,
             no_resolution=not has_resolution,
@@ -721,16 +587,15 @@ def analyze_dream_runtime(dream_text: str, user_id: int, use_profile: bool = Tru
             recurring_count=sum(1 for s, score in raw_symbols.items() if score > 0.5)
         )
 
-        symbol_conf, overall_conf = get_confidence_utils()
-        symbol_conf = symbol_conf(grounded_symbols)
-        overall_conf = overall_conf(
+        symbol_conf = compute_symbol_confidence(grounded_symbols)
+        overall_conf = compute_overall_confidence(
             symbol_conf,
             emotion_conf,
             len(grounded_symbols)
         )
 
         # ✅ CRITICAL: Pass user_profile to generate_interpretation
-        interpretation = get_interpretation()(
+        interpretation = generate_interpretation(
             dynamics=dynamics,
             dream_text=dream_text,
             dominant_emotion=dominant_emotion,
@@ -760,7 +625,7 @@ def analyze_dream_runtime(dream_text: str, user_id: int, use_profile: bool = Tru
             },
             "trauma_score": float(trauma_score),
             "trauma_level": trauma_level,
-            "analysis_version": "v12_lazy_model",  # ✅ Updated version with lazy loading
+            "analysis_version": "v11_dreambank_similarity",  # ✅ Updated version
             "user_profile_used": profile_was_used  # ✅ CORRECT: Actual boolean value
         }
     except Exception as e:
@@ -782,14 +647,12 @@ def analyze_dream_runtime(dream_text: str, user_id: int, use_profile: bool = Tru
             "user_profile_used": False
         }
 
-
 # -------------------------------------------------
 # IMAGE ROUTES - ✅ FIXED get_visualizations ENDPOINT
 # -------------------------------------------------
 @app.route("/dream_images/<path:filename>")
 def serve_dream_image(filename):
     return send_from_directory(BASE_DIR / "dream_output", filename)
-
 
 @app.route("/get_visualizations", methods=["GET"])
 @auth_required
@@ -830,7 +693,6 @@ def get_visualizations():
         print(f"ERROR in get_visualizations: {e}")
         return jsonify([]), 500
 
-
 @app.route("/delete_dream_batch/<dream_batch_id>", methods=["DELETE"])
 @auth_required
 def delete_dream_batch(dream_batch_id):
@@ -853,7 +715,6 @@ def delete_dream_batch(dream_batch_id):
         db.session.rollback()
         return jsonify({"error": "Delete failed"}), 500
 
-
 @app.route("/visualize_dream", methods=["POST"])
 @auth_required
 def visualize_dream():
@@ -866,7 +727,7 @@ def visualize_dream():
     dream_batch_id = str(uuid.uuid4())
     request_id = uuid.uuid4().hex[:8]
 
-    scenes = get_scene_splitter()(
+    scenes = split_into_scenes(
         dream_text,
         chunk_size=50,
         max_scenes=3
@@ -877,9 +738,9 @@ def visualize_dream():
 
     for i, scene in enumerate(scenes):
         is_final = (i == len(scenes) - 1)
-        prompt = get_prompt_builder()(scene, is_final=is_final)
+        prompt = build_prompt(scene, is_final=is_final)
         unique_index = f"{request_id}_{i}"
-        filename = get_image_generator()(prompt, unique_index)
+        filename = generate_image(prompt, unique_index)
 
         image_url = f"{base_url}/dream_images/{filename.name}"
         image_urls.append(image_url)
@@ -897,7 +758,6 @@ def visualize_dream():
         "images": image_urls,
         "dream_batch_id": dream_batch_id
     })
-
 
 # -------------------------------------------------
 # AUTH ROUTES
@@ -943,7 +803,7 @@ Click the link below to verify your account:
 
 {verify_link}
 
-If you didn't sign up, ignore this email.
+If you didn’t sign up, ignore this email.
 """
 
             mail.send(msg)
@@ -970,7 +830,6 @@ If you didn't sign up, ignore this email.
         "verification_required": app.config["EMAIL_VERIFICATION_ENABLED"]
     }), 201
 
-
 @app.route("/verify/<token>")
 def verify_email(token):
     if not app.config["EMAIL_VERIFICATION_ENABLED"]:
@@ -986,8 +845,6 @@ def verify_email(token):
     db.session.commit()
 
     return redirect("http://localhost:3000/login?verified=true")
-
-
 @app.route("/login", methods=["POST"])
 def login():
     data = request.get_json() or {}
@@ -1007,9 +864,8 @@ def login():
         "user": {"id": user.id, "email": user.email, "username": user.username}
     })
 
-
 # -------------------------------------------------
-# 💭 DREAM ROUTES - ✅ FULLY UPDATED WITH DREAMBANK SIMILARITY + LAZY LOADING!
+# 💭 DREAM ROUTES - ✅ FULLY UPDATED WITH DREAMBANK SIMILARITY!
 # -------------------------------------------------
 @app.route("/add_dream", methods=["POST"])
 @auth_required
@@ -1025,57 +881,12 @@ def add_dream():
         return jsonify({"error": "Dream content required"}), 400
 
     try:
-        
-       
-        
-        # ✅ NEW (ngrok offload) - Replace analyze_dream_runtime with API call
-        print("🌐 Offloading dream analysis to ngrok analyzer...")
-        response = requests.post(
-            "https://nonchromatic-collin-felly.ngrok-free.dev", 
-            json={
-                "dream": content,
-                "user_id": request.user_id,
-                "use_profile": use_profile
-            },
-            timeout=60,  # 60 second timeout for heavy analysis
-            headers={"Content-Type": "application/json"}
-        )
-        
-        if response.status_code != 200:
-            print(f"❌ Ngrok analyzer failed: {response.status_code} - {response.text}")
-            # Fallback to local analysis if ngrok fails
-            print("🔄 Falling back to local analyze_dream_runtime...")
-            result = analyze_dream_runtime(content, request.user_id, use_profile)
-        else:
-            result = response.json()
-            print("✅ Ngrok analysis successful")
-
-    except requests.exceptions.RequestException as e:
-        print(f"❌ Ngrok request failed: {e}")
-        # Fallback to local analysis if network fails
-        print("🔄 Falling back to local analyze_dream_runtime...")
+        # ✅ CRITICAL: Pass user_id and use_profile to analysis function
         result = analyze_dream_runtime(content, request.user_id, use_profile)
-    except Exception as e:
-        print(f"❌ Analysis failed: {e}")
+    except Exception:
         traceback.print_exc()
-        # Safe fallback result
-        result = {
-            "dominant_emotion": "neutral",
-            "trajectory": {},
-            "symbols": {},
-            "symbol_prominence": {},
-            "avg_symbol_prominence": 0.0,
-            "interpretation": "Analysis service temporarily unavailable. The dream reflects complex emotional processing.",
-            "dream_similarity": 0.0,
-            "similar_dream_example": None,
-            "confidence": {"symbol": 0.0, "overall": 0.0},
-            "trauma_score": 0.0,
-            "trauma_level": "Low",
-            "analysis_version": "fallback_v1",
-            "user_profile_used": False
-        }
+        return jsonify({"error": "Dream analysis failed"}), 500
 
-    # ✅ REST OF ROUTE UNCHANGED - Save to DB
     dream = Dream(
         title=title,
         content=content,
@@ -1090,7 +901,7 @@ def add_dream():
         trauma_level=result.get("trauma_level", "Low"),
         analysis_version=result["analysis_version"],
         user_profile_used=result["user_profile_used"],
-        dream_similarity=result.get("dream_similarity", 0.0),
+        dream_similarity=result.get("dream_similarity", 0.0),  # ✅ NEW: NOW STORED IN DB
         user_id=request.user_id
     )
 
@@ -1098,12 +909,10 @@ def add_dream():
     db.session.commit()
 
     return jsonify({
-        "message": "Dream saved with analysis (ngrok offloaded)",
+        "message": "Dream saved with personalized interpretation + DreamBank similarity",
         "profile_used": result.get("user_profile_used", False),
-        "dream_similarity": result.get("dream_similarity", 0.0),
-        "analysis_version": result.get("analysis_version", "unknown")
+        "dream_similarity": result.get("dream_similarity", 0.0)  # ✅ NEW
     }), 201
-
 
 @app.route("/get_dreams", methods=["GET"])
 @auth_required
@@ -1136,7 +945,6 @@ def get_dreams():
         for d in dreams
     ])
 
-
 @app.route("/delete_dream/<int:dream_id>", methods=["DELETE"])
 @auth_required
 def delete_dream(dream_id):
@@ -1150,14 +958,11 @@ def delete_dream(dream_id):
     db.session.commit()
     return jsonify({"message": "Dream deleted"})
 
-
-chatbot_bp = get_chatbot_bp()
 app.register_blueprint(chatbot_bp)
 
 @app.route("/")
 def home():
     return "REMinder API is running 🚀"
-
 
 if __name__ == "__main__":
     import os
@@ -1166,10 +971,4 @@ if __name__ == "__main__":
 
     port = int(os.environ.get("PORT", 5000))
 
-    app.run(
-        host="0.0.0.0",
-        port=port,
-        debug=False,
-        use_reloader=False,
-        threaded=True
-    )
+    app.run(host="0.0.0.0", port=port, debug=False, use_reloader=False, threaded=True)

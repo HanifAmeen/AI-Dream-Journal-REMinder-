@@ -21,8 +21,10 @@ import ChatbotPanel from "./components/Chatbot/ChatbotPanel";
 import Footer from "./components/Common/Footer/footer";
 
 import { authHeaders, logout } from "./auth";
-import API_URL from "./config"; // ✅ NEW
 import "./App.css";
+
+// 🔥 ADD THIS
+const API_URL = "http://104.236.119.70:5000";
 
 function App() {
   const [dreams, setDreams] = useState([]);
@@ -39,7 +41,7 @@ function App() {
   --------------------------------------------------*/
   const fetchDreams = async () => {
     try {
-      const res = await fetch(`${API_URL}/get_dreams`, { // ✅ UPDATED
+      const res = await fetch(`${API_URL}/get_dreams`, {
         method: "GET",
         headers: authHeaders(),
       });
@@ -61,7 +63,7 @@ function App() {
   --------------------------------------------------*/
   const addDream = async ({ title, content, mood, use_profile }) => {
     try {
-      const res = await fetch(`${API_URL}/add_dream`, { // ✅ UPDATED
+      const res = await fetch(`${API_URL}/add_dream`, {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify({
@@ -94,7 +96,7 @@ function App() {
   --------------------------------------------------*/
   const deleteDream = async (id) => {
     try {
-      await fetch(`${API_URL}/delete_dream/${id}`, { // ✅ UPDATED
+      await fetch(`${API_URL}/delete_dream/${id}`, {
         method: "DELETE",
         headers: authHeaders(),
       });
@@ -194,7 +196,6 @@ function App() {
 
           <Footer />
 
-          {/* Chatbot */}
           <ChatbotButton />
 
           <ChatbotPanel
