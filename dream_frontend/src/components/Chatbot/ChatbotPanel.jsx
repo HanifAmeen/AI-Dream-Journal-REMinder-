@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useChatbot } from "../../context/ChatbotContext";
 import "./chatbot.css";
 import Mascot from "./Mascot";
+const API_URL = "http://104.236.119.70:5000";
 
 // ✅ OPTIONAL BUT CLEAN: define headers once
 const getAuthHeaders = () => ({
@@ -49,9 +50,7 @@ export default function ChatbotPanel({ page, dreamContext }) {
       if (!storedId) return;
 
       try {
-        const res = await fetch(
-          `http://127.0.0.1:5000/chatbot/history/${storedId}`,
-          {
+        const res = await fetch(`${API_URL}/chatbot/history/${storedId}`, {
             headers: getAuthHeaders()
           }
         );
@@ -79,7 +78,7 @@ export default function ChatbotPanel({ page, dreamContext }) {
   const confirmNewChat = async () => {
     setShowConfirmDialog(false);
     try {
-      const res = await fetch("http://127.0.0.1:5000/chatbot/new_chat", {
+      const res = await fetch(`${API_URL}/chatbot/new_chat`, {
         method: "POST",
         headers: getAuthHeaders()
       });
@@ -113,7 +112,7 @@ export default function ChatbotPanel({ page, dreamContext }) {
     // ✅ STEP 2 — Create conversation if needed (with auth)
     let currentId = conversationId;
     if (!currentId) {
-      const res = await fetch("http://127.0.0.1:5000/chatbot/new_chat", {
+      const res = await fetch(`${API_URL}/chatbot/new_chat`, {
         method: "POST",
         headers: getAuthHeaders()
       });
@@ -146,7 +145,7 @@ export default function ChatbotPanel({ page, dreamContext }) {
       };
     }
 
-    const res = await fetch(`http://127.0.0.1:5000${endpoint}`, {
+    const res = await fetch(`${API_URL}${endpoint}`, {
       method: "POST",
       headers: getAuthHeaders(),
       body: JSON.stringify(body)

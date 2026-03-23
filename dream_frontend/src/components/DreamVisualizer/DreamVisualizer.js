@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "./DreamVisualizer.css";
+const API_URL = "http://104.236.119.70:5000";
 
 function DreamVisualizer() {
   const [dream, setDream] = useState("");
@@ -39,7 +40,7 @@ function DreamVisualizer() {
     const loadDreamBatches = async () => {
       try {
         setError(null);
-        const batches = await fetchWithAuth("http://127.0.0.1:5000/get_visualizations");
+        const batches = await fetchWithAuth(`${API_URL}/get_visualizations`);
         setDreamBatches(batches || []);
       } catch (err) {
         console.error("Failed to load dream batches:", err);
@@ -57,7 +58,7 @@ function DreamVisualizer() {
     setError(null);
 
     try {
-      const data = await fetchWithAuth("http://127.0.0.1:5000/visualize_dream", {
+      const data = await fetchWithAuth(`${API_URL}/visualize_dream`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ dream }),
@@ -106,7 +107,7 @@ function DreamVisualizer() {
 
   const deleteBatch = useCallback(async (batchId) => {
     try {
-      await fetchWithAuth(`http://127.0.0.1:5000/delete_dream_batch/${batchId}`, {
+      await fetchWithAuth(`${API_URL}/delete_dream_batch/${batchId}`, {
         method: "DELETE",
       });
       setDreamBatches(prev => prev.filter(batch => batch.id !== batchId));

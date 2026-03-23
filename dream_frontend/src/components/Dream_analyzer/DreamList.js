@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./DreamList.css";
+const API_URL = "http://104.236.119.70:5000";
 
 const fmt = (n) =>
   typeof n === "number" ? n.toFixed(2) : "—";
@@ -84,7 +85,7 @@ export default function DreamList({ dreams = [] }) {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch(`http://localhost:5000/delete_dream/${id}`, {
+      const res = await fetch(`${API_URL}/delete_dream/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

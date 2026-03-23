@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./profile.css";
+const API_URL = "http://104.236.119.70:5000";
 
 export default function ProfilePage() {
   const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -21,7 +22,7 @@ export default function ProfilePage() {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        const res = await fetch("http://127.0.0.1:5000/get_profile", {
+        const res = await fetch(`${API_URL}/get_profile`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -92,7 +93,7 @@ export default function ProfilePage() {
         return;
       }
 
-      const res = await fetch("http://127.0.0.1:5000/update_profile", {
+      const res = await fetch(`${API_URL}/update_profile`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

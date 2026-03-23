@@ -28,7 +28,7 @@ function Login() {
   const submitLogin = async (e) => {
     e.preventDefault();
 
-    const res = await fetch("http://104.236.119.70:5000/login", {
+    const res = await fetch("/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -58,7 +58,7 @@ function Login() {
   const submitSignup = async (e) => {
     e.preventDefault();
 
-    const res = await fetch("http://104.236.119.70:5000/login", {
+    const res = await fetch("/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, username, password }),

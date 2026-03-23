@@ -22,8 +22,6 @@ import Footer from "./components/Common/Footer/footer";
 
 import { authHeaders, logout } from "./auth";
 import "./App.css";
-
-// 🔥 ADD THIS
 const API_URL = "http://104.236.119.70:5000";
 
 function App() {
@@ -36,12 +34,9 @@ function App() {
   const standalonePages = ["/welcome", "/login", "/signup"];
   const isStandalone = standalonePages.includes(location.pathname);
 
-  /* -------------------------------------------------
-     Fetch Dreams
-  --------------------------------------------------*/
   const fetchDreams = async () => {
     try {
-      const res = await fetch(`${API_URL}/get_dreams`, {
+      const res = await fetch("/get_dreams", {
         method: "GET",
         headers: authHeaders(),
       });
@@ -58,12 +53,9 @@ function App() {
     }
   };
 
-  /* -------------------------------------------------
-     Add Dream
-  --------------------------------------------------*/
   const addDream = async ({ title, content, mood, use_profile }) => {
     try {
-      const res = await fetch(`${API_URL}/add_dream`, {
+      const res = await fetch("/add_dream", {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify({
@@ -91,25 +83,29 @@ function App() {
     }
   };
 
-  /* -------------------------------------------------
-     Delete Dream
-  --------------------------------------------------*/
-  const deleteDream = async (id) => {
-    try {
-      await fetch(`${API_URL}/delete_dream/${id}`, {
-        method: "DELETE",
-        headers: authHeaders(),
-      });
+const deleteDream = async (id) => {
+  try {
+    const res = await fetch(`${API_URL}/delete_dream/${id}`, {
+      method: "DELETE",
+      headers: {
+        ...authHeaders(),
+        "Content-Type": "application/json",
+      },
+    });
 
-      await fetchDreams();
-    } catch (err) {
-      console.error("Error deleting dream:", err);
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("Delete failed:", text);
+      alert("Delete failed");
+      return;
     }
-  };
 
-  /* -------------------------------------------------
-     Load Dreams
-  --------------------------------------------------*/
+    await fetchDreams();
+  } catch (err) {
+    console.error("Error deleting dream:", err);
+  }
+};
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -117,18 +113,12 @@ function App() {
     fetchDreams();
   }, [location.pathname]);
 
-  /* -------------------------------------------------
-     Scroll Helper
-  --------------------------------------------------*/
   const scrollToBottom = () => {
     if (listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight;
     }
   };
 
-  /* -------------------------------------------------
-     App Layout
-  --------------------------------------------------*/
   return (
     <>
       {isStandalone ? (
@@ -195,7 +185,6 @@ function App() {
           </div>
 
           <Footer />
-
           <ChatbotButton />
 
           <ChatbotPanel
