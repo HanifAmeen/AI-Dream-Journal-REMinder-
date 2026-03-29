@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import "./profile.css";
-const API_URL = "http://104.236.119.70:5000";
+
+// ✅ FIXED → local backend
+const API_URL = "http://localhost:5000";
 
 export default function ProfilePage() {
   const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -15,7 +17,9 @@ export default function ProfilePage() {
     religion: ""
   });
 
-  // Load base user info + saved profile
+  const [loading, setLoading] = useState(false);
+
+  // ✅ LOAD PROFILE
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -28,7 +32,15 @@ export default function ProfilePage() {
           }
         });
 
-        const data = await res.json();
+        if (!res.ok) throw new Error("Failed to fetch profile");
+
+        let data;
+        try {
+          data = await res.json();
+        } catch {
+          console.error("Invalid JSON (profile)");
+          return;
+        }
 
         if (data && Object.keys(data).length > 0) {
           setProfile(prev => ({
@@ -41,7 +53,6 @@ export default function ProfilePage() {
       }
     };
 
-    // First load stored user info
     if (storedUser) {
       setProfile(prev => ({
         ...prev,
@@ -50,10 +61,10 @@ export default function ProfilePage() {
       }));
     }
 
-    // Then fetch saved profile from backend
     fetchProfile();
   }, []);
 
+  // ✅ HANDLE INPUT
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -62,7 +73,6 @@ export default function ProfilePage() {
       [name]: value
     };
 
-    // If DOB changes → calculate age automatically
     if (name === "dob" && value) {
       const birthDate = new Date(value);
       const today = new Date();
@@ -83,10 +93,13 @@ export default function ProfilePage() {
     setProfile(updatedProfile);
   };
 
+  // ✅ SAVE PROFILE
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
+      setLoading(true);
+
       const token = localStorage.getItem("token");
       if (!token) {
         alert("No token found. Please login again.");
@@ -102,7 +115,13 @@ export default function ProfilePage() {
         body: JSON.stringify(profile)
       });
 
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        alert("Invalid server response");
+        return;
+      }
 
       if (res.ok) {
         alert("Profile saved successfully!");
@@ -111,7 +130,56 @@ export default function ProfilePage() {
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to save profile. Please try again.");
+      alert("Failed to save profile.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ DELETE ACCOUNT
+  const handleDeleteAccount = async () => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete your account? This cannot be undone."
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      setLoading(true);
+
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${API_URL}/delete_account`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        alert("Invalid server response");
+        return;
+      }
+
+      if (res.ok) {
+        alert("Account deleted successfully");
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("conversation_id");
+
+        window.location.href = "/login";
+      } else {
+        alert(data.error || "Failed to delete account");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting account");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -121,22 +189,15 @@ export default function ProfilePage() {
 
       <form className="profile-form" onSubmit={handleSubmit}>
         <div className="profile-grid">
+
           <div className="form-group">
             <label>Name</label>
-            <input
-              type="text"
-              value={profile.username}
-              disabled
-            />
+            <input type="text" value={profile.username} disabled />
           </div>
 
           <div className="form-group">
             <label>Email</label>
-            <input
-              type="email"
-              value={profile.email}
-              disabled
-            />
+            <input type="email" value={profile.email} disabled />
           </div>
 
           <div className="form-group">
@@ -151,12 +212,7 @@ export default function ProfilePage() {
 
           <div className="form-group">
             <label>Age</label>
-            <input
-              type="number"
-              name="age"
-              value={profile.age}
-              readOnly
-            />
+            <input type="number" value={profile.age} readOnly />
           </div>
 
           <div className="form-group">
@@ -179,7 +235,6 @@ export default function ProfilePage() {
               <option value="">Select</option>
               <option>Male</option>
               <option>Female</option>
-           
             </select>
           </div>
 
@@ -190,15 +245,32 @@ export default function ProfilePage() {
               name="religion"
               value={profile.religion}
               onChange={handleChange}
-              
             />
           </div>
+
         </div>
 
-        <button className="save-profile" type="submit">
-          Save Profile
+        <button className="save-profile" type="submit" disabled={loading}>
+          {loading ? "Saving..." : "Save Profile"}
         </button>
       </form>
+
+      <div style={{ marginTop: "30px", textAlign: "center" }}>
+        <button
+          onClick={handleDeleteAccount}
+          style={{
+            background: "#ff4d4f",
+            color: "white",
+            border: "none",
+            padding: "12px 20px",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontWeight: "bold"
+          }}
+        >
+          Delete Account
+        </button>
+      </div>
     </div>
   );
 }

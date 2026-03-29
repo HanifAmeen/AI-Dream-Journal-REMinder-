@@ -55,7 +55,7 @@ function Navbar() {
       </div>
 
       <div className="navbar-right">
-        <Link to="/tools" className="nav-link">Tools</Link>
+        
         <Link to="/profile" className="nav-link">Profile</Link>
         <Link to="/about" className="nav-link">About us</Link>
 

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./DreamList.css";
-const API_URL = "http://104.236.119.70:5000";
+const API_URL = "http://localhost:5000";
 
 const fmt = (n) =>
   typeof n === "number" ? n.toFixed(2) : "—";

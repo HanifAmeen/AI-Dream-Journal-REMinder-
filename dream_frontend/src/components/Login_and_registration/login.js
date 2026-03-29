@@ -28,7 +28,7 @@ function Login() {
   const submitLogin = async (e) => {
     e.preventDefault();
 
-    const res = await fetch("/login", {
+    const res = await fetch("http://localhost:5000/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -58,7 +58,7 @@ function Login() {
   const submitSignup = async (e) => {
     e.preventDefault();
 
-    const res = await fetch("/signup", {
+    const res = await fetch("http://localhost:5000/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, username, password }),
@@ -179,3 +179,186 @@ function Login() {
 }
 
 export default Login;
+
+
+// import React, { useState, useEffect } from "react";
+// import { useLocation } from "react-router-dom";
+// import "./auth.css";
+
+// function Login() {
+//   const [mode, setMode] = useState("login"); // "login" or "signup"
+
+//   // Shared fields
+//   const [email, setEmail] = useState("");
+//   const [password, setPassword] = useState("");
+//   const [username, setUsername] = useState(""); // signup only
+
+//   const location = useLocation();
+
+//   /* -----------------------
+//       HANDLE EMAIL VERIFIED REDIRECT
+//   ------------------------ */
+//   useEffect(() => {
+//     const params = new URLSearchParams(location.search);
+//     if (params.get("verified") === "true") {
+//       alert("Email verified successfully 🎉 You can now log in.");
+//     }
+//   }, [location.search]);
+
+//   /* -----------------------
+//       LOGIN SUBMIT
+//   ------------------------ */
+//   const submitLogin = async (e) => {
+//     e.preventDefault();
+
+//     const res = await fetch("/login", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ email, password }),
+//     });
+
+//     const data = await res.json();
+
+//     if (!res.ok) {
+//       if (res.status === 403) {
+//         alert("Please verify your email before logging in 📩");
+//       } else {
+//         alert(data.error || "Login failed");
+//       }
+//       return;
+//     }
+
+//     localStorage.setItem("token", data.token);
+//     localStorage.setItem("user", JSON.stringify(data.user));
+//     localStorage.setItem("justLoggedIn", "true");
+
+//     window.location.href = "/home";
+//   };
+
+//   /* -----------------------
+//       SIGNUP SUBMIT
+//   ------------------------ */
+//   const submitSignup = async (e) => {
+//     e.preventDefault();
+
+//     const res = await fetch("/signup", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ email, username, password }),
+//     });
+
+//     const data = await res.json();
+
+//     if (!res.ok) {
+//       alert(data.error || "Signup failed");
+//       return;
+//     }
+
+//     // 🔥 Handle verification ON vs OFF
+//     if (data.verification_required) {
+//       alert("Account created! Please check your email to verify your account 📩");
+//     } else {
+//       alert("Account created! You can now log in.");
+//     }
+
+//     setMode("login");
+//   };
+
+//   return (
+//     <div className="auth-page">
+//       <div
+//         className={`auth-container form-wrapper ${
+//           mode === "signup" ? "morph-signup" : "morph-login"
+//         }`}
+//       >
+//         {/* ----------------------
+//              LOGIN FORM
+//         ------------------------ */}
+//         {mode === "login" && (
+//           <div className="form-content fade-slide-in">
+//             <h2>Login</h2>
+//             <form onSubmit={submitLogin} className="auth-form">
+//               <input
+//                 type="email"
+//                 placeholder="Email"
+//                 value={email}
+//                 required
+//                 onChange={(e) => setEmail(e.target.value)}
+//               />
+
+//               <input
+//                 type="password"
+//                 placeholder="Password"
+//                 value={password}
+//                 required
+//                 onChange={(e) => setPassword(e.target.value)}
+//               />
+
+//               <button type="submit">Login</button>
+//             </form>
+
+//             <div className="auth-footer">
+//               <button
+//                 className="switch-btn"
+//                 onClick={() => setMode("signup")}
+//               >
+//                 Don't have an account?
+//                 <br />
+//                 Create one
+//               </button>
+//             </div>
+//           </div>
+//         )}
+
+//         {/* ----------------------
+//              SIGNUP FORM
+//         ------------------------ */}
+//         {mode === "signup" && (
+//           <div className="form-content fade-slide-in">
+//             <h2>Signup</h2>
+//             <form onSubmit={submitSignup} className="auth-form">
+//               <input
+//                 type="email"
+//                 placeholder="Email"
+//                 value={email}
+//                 required
+//                 onChange={(e) => setEmail(e.target.value)}
+//               />
+
+//               <input
+//                 type="text"
+//                 placeholder="Username"
+//                 value={username}
+//                 required
+//                 onChange={(e) => setUsername(e.target.value)}
+//               />
+
+//               <input
+//                 type="password"
+//                 placeholder="Password"
+//                 value={password}
+//                 required
+//                 onChange={(e) => setPassword(e.target.value)}
+//               />
+
+//               <button type="submit">Signup</button>
+//             </form>
+
+//             <div className="auth-footer">
+//               <button
+//                 className="switch-btn"
+//                 onClick={() => setMode("login")}
+//               >
+//                 Already have an account?
+//                 <br />
+//                 Sign in
+//               </button>
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default Login;

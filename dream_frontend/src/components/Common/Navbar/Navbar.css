@@ -6,7 +6,7 @@
   width: 100%;
 
   height: 70px;
-  padding: 0 30px;
+  padding: 0 20px;
 
   display: flex;
   justify-content: space-between;
@@ -17,8 +17,7 @@
   border-bottom: 1px solid rgba(255,255,255,0.12);
 
   z-index: 1000;
-
-  overflow: hidden;   /* keeps spector inside navbar */
+  overflow: hidden;
 }
 
 /* LEFT + RIGHT GROUPS */
@@ -26,12 +25,12 @@
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 20px;
 }
 
 /* LOGO */
 .navbar-logo {
-  width: 60px;
+  width: 55px;
   height: auto;
   cursor: pointer;
   opacity: 0.95;
@@ -47,10 +46,11 @@
 .nav-link {
   color: white;
   text-decoration: none;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
   transition: opacity 0.2s, text-shadow 0.2s;
+  white-space: nowrap;
 }
 
 .nav-link:hover {
@@ -58,57 +58,110 @@
   text-shadow: 0 0 8px rgba(255,255,255,0.4);
 }
 
-/* LOGOUT (STYLED LIKE A LINK) */
+/* LOGOUT */
 .logout-button {
   background: none;
   border: none;
   color: #ff6d6d;
   font-weight: bold;
   cursor: pointer;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 /* USERNAME */
 .nav-username {
   color: rgba(255,255,255,0.8);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 /* SPECTOR RUNNING ANIMATION */
-
 .spector-run {
   position: absolute;
   top: 12px;
   left: -120px;
-  height: 45px;
+  height: 40px;
   pointer-events: none;
   animation: spectorRun 3s linear forwards;
 }
 
 /* RUN ACROSS NAVBAR */
-
 @keyframes spectorRun {
-
   0% {
     left: -120px;
     transform: translateY(0);
   }
-
   25% {
     transform: translateY(-4px);
   }
-
   50% {
     transform: translateY(0);
   }
-
   75% {
     transform: translateY(-4px);
   }
-
   100% {
     left: 110%;
     transform: translateY(0);
   }
+}
 
+/* ================= MOBILE RESPONSIVENESS ================= */
+
+/* Tablets */
+@media (max-width: 900px) {
+  .navbar-container {
+    padding: 0 15px;
+  }
+
+  .navbar-left,
+  .navbar-right {
+    gap: 14px;
+  }
+
+  .nav-link {
+    font-size: 0.95rem;
+  }
+
+  .navbar-logo {
+    width: 50px;
+  }
+}
+
+/* Phones */
+@media (max-width: 600px) {
+
+  .navbar-container {
+    height: auto;
+    padding: 10px 15px;
+    flex-wrap: wrap;
+  }
+
+  .navbar-left {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .navbar-right {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 5px;
+  }
+
+  .nav-link {
+    font-size: 0.9rem;
+  }
+
+  .nav-username {
+    font-size: 0.8rem;
+  }
+
+  .navbar-logo {
+    width: 45px;
+  }
+
+  .spector-run {
+    height: 35px;
+    top: 8px;
+  }
 }

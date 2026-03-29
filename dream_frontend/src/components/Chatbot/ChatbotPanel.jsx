@@ -2,13 +2,16 @@ import { useState, useEffect, useRef } from "react";
 import { useChatbot } from "../../context/ChatbotContext";
 import "./chatbot.css";
 import Mascot from "./Mascot";
-const API_URL = "http://104.236.119.70:5000";
 
-// ✅ OPTIONAL BUT CLEAN: define headers once
-const getAuthHeaders = () => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${localStorage.getItem("token")}`
-});
+// ✅ Safe auth headers
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("token");
+
+  return {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` })
+  };
+};
 
 export default function ChatbotPanel({ page, dreamContext }) {
   const {
@@ -18,7 +21,8 @@ export default function ChatbotPanel({ page, dreamContext }) {
     pendingQuestion,
     setPendingQuestion,
     isTyping,
-    setIsTyping
+    setIsTyping,
+    setIsOpen
   } = useChatbot();
 
   const [input, setInput] = useState("");
@@ -26,15 +30,14 @@ export default function ChatbotPanel({ page, dreamContext }) {
     localStorage.getItem("conversation_id")
   );
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
 
-  // ✅ NEW: Cancel request function
   const cancelRequest = () => {
     setIsTyping(false);
   };
 
-  // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -43,17 +46,23 @@ export default function ChatbotPanel({ page, dreamContext }) {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  // ✅ STEP 3 — FIXED HISTORY LOADER (with auth header)
+  // ✅ LOAD CHAT HISTORY
   useEffect(() => {
     const loadChat = async () => {
       const storedId = localStorage.getItem("conversation_id");
+      console.log("conversation_id:", storedId);
+
       if (!storedId) return;
 
       try {
-        const res = await fetch(`${API_URL}/chatbot/history/${storedId}`, {
+        const res = await fetch(
+          `http://localhost:5000/chatbot/history/${storedId}`,
+          {
             headers: getAuthHeaders()
           }
         );
+
+        if (!res.ok) throw new Error("Failed to fetch history");
 
         const data = await res.json();
 
@@ -72,16 +81,23 @@ export default function ChatbotPanel({ page, dreamContext }) {
     };
 
     loadChat();
-  }, []);
+  }, [setMessages]);
 
-  // ✅ STEP 3: KEEP newChat() as is (user explicitly wants new chat)
+  // ✅ CREATE NEW CHAT
   const confirmNewChat = async () => {
     setShowConfirmDialog(false);
+
     try {
-      const res = await fetch(`${API_URL}/chatbot/new_chat`, {
-        method: "POST",
-        headers: getAuthHeaders()
-      });
+      const res = await fetch(
+        "http://localhost:5000/chatbot/new_chat",
+        {
+          method: "POST",
+          headers: getAuthHeaders()
+        }
+      );
+
+      if (!res.ok) throw new Error("New chat failed");
+
       const data = await res.json();
 
       setConversationId(data.conversation_id);
@@ -96,75 +112,87 @@ export default function ChatbotPanel({ page, dreamContext }) {
     setShowConfirmDialog(true);
   };
 
-  // ✅ STEP 1 & STEP 2 — FIXED sendMessage() (with auth everywhere)
+  const closeChatbot = () => {
+    if (typeof setIsOpen === "function") {
+      setIsOpen(false);
+    }
+  };
+
+  // ✅ SEND MESSAGE
   const sendMessage = async () => {
     if (!input.trim() || isTyping) return;
 
     const userInput = input;
 
-    // 1️⃣ Show user message immediately
     setMessages(prev => [...prev, { role: "user", text: userInput }]);
     setInput("");
-
-    // 2️⃣ Enter thinking state
     setIsTyping(true);
 
-    // ✅ STEP 2 — Create conversation if needed (with auth)
     let currentId = conversationId;
-    if (!currentId) {
-      const res = await fetch(`${API_URL}/chatbot/new_chat`, {
+
+    try {
+      if (!currentId) {
+        const res = await fetch(
+          "http://localhost:5000/chatbot/new_chat",
+          {
+            method: "POST",
+            headers: getAuthHeaders()
+          }
+        );
+
+        const data = await res.json();
+
+        currentId = data.conversation_id;
+        setConversationId(currentId);
+        localStorage.setItem("conversation_id", currentId);
+      }
+
+      let url = "http://localhost:5000/chatbot/respond";
+      let body = {};
+
+      if (pendingQuestion) {
+        url = "http://localhost:5000/chatbot/followup";
+        body = {
+          dream_id: dreamContext?.id || 1,
+          question: pendingQuestion,
+          answer: userInput,
+          conversation_id: currentId,
+          dream_context: dreamContext
+        };
+        setPendingQuestion(null);
+      } else {
+        body = {
+          message: userInput,
+          conversation_id: currentId,
+          dream_context: dreamContext
+        };
+      }
+
+      const res = await fetch(url, {
         method: "POST",
-        headers: getAuthHeaders()
+        headers: getAuthHeaders(),
+        body: JSON.stringify(body)
       });
 
+      if (!res.ok) throw new Error("Chat request failed");
+
       const data = await res.json();
-      currentId = data.conversation_id;
-      setConversationId(currentId);
-      localStorage.setItem("conversation_id", currentId);
-    }
 
-    let endpoint = "/chatbot/respond";
-    let body = {};
+      setTimeout(() => {
+        setIsTyping(false);
+        setMessages(prev => [
+          ...prev,
+          { role: "bot", text: data.response }
+        ]);
 
-    if (pendingQuestion) {
-      endpoint = "/chatbot/followup";
-      body = {
-        dream_id: dreamContext?.id || 1,
-        question: pendingQuestion,
-        answer: userInput,
-        conversation_id: currentId,
-        dream_context: dreamContext
-      };
-      setPendingQuestion(null);
-    } else {
-      // ✅ STEP 1 — Fixed body with conversation_id
-      body = {
-        message: userInput,
-        conversation_id: currentId,
-        dream_context: dreamContext
-      };
-    }
-
-    const res = await fetch(`${API_URL}${endpoint}`, {
-      method: "POST",
-      headers: getAuthHeaders(),
-      body: JSON.stringify(body)
-    });
-
-    const data = await res.json();
-
-    // 3️⃣ Artificial thinking delay (UX polish)
-    setTimeout(() => {
+        if (data.type === "question") {
+          setPendingQuestion(data.response);
+        }
+      }, 1000);
+    } catch (err) {
+      console.error("Chatbot request failed:", err);
       setIsTyping(false);
-      setMessages(prev => [
-        ...prev,
-        { role: "bot", text: data.response }
-      ]);
-
-      if (data.type === "question") {
-        setPendingQuestion(data.response);
-      }
-    }, 3000);
+    }
   };
 
   if (!isOpen) return null;
@@ -174,29 +202,32 @@ export default function ChatbotPanel({ page, dreamContext }) {
       <div className="chatbot-panel">
         <div className="chatbot-header">
           <span>Spectors Corner</span>
+
           <div className="header-actions">
             <button
               onClick={scrollToBottom}
               className="scroll-bottom-btn"
-              title="Scroll to bottom"
             >
               ↓
             </button>
+
             <button onClick={newChat} className="new-chat-btn">
               New Chat
+            </button>
+
+            <button
+              onClick={closeChatbot}
+              className="chatbot-close-btn"
+            >
+              ×
             </button>
           </div>
         </div>
 
         <div className="chatbot-messages" ref={messagesContainerRef}>
           {messages.map((m, i) => (
-            <div
-              key={i}
-              className={`chatbot-message-row ${m.role}`}
-            >
-              {m.role === "bot" && (
-                <Mascot state="replying" small />
-              )}
+            <div key={i} className={`chatbot-message-row ${m.role}`}>
+              {m.role === "bot" && <Mascot state="replying" small />}
 
               <div
                 className={`chatbot-message-bubble ${m.role}`}
@@ -209,17 +240,13 @@ export default function ChatbotPanel({ page, dreamContext }) {
             <div className="chatbot-message-row bot">
               <Mascot state="thinking" small />
 
-              {/* ✅ UPDATED: Typing indicator with Cancel button */}
               <div className="chatbot-message-bubble bot typing">
                 Spector is thinking
                 <span className="dot">.</span>
                 <span className="dot">.</span>
                 <span className="dot">.</span>
 
-                <button
-                  className="cancel-btn"
-                  onClick={cancelRequest}
-                >
+                <button className="cancel-btn" onClick={cancelRequest}>
                   Cancel
                 </button>
               </div>
@@ -229,7 +256,6 @@ export default function ChatbotPanel({ page, dreamContext }) {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* ✅ UPDATED: Input with Send button */}
         <div className="chatbot-input">
           <textarea
             className="chatbot-textarea"
@@ -255,13 +281,13 @@ export default function ChatbotPanel({ page, dreamContext }) {
         </div>
       </div>
 
-      {/* Confirmation Dialog */}
       {showConfirmDialog && (
         <div className="confirm-dialog-overlay">
           <div className="confirm-dialog">
             <div className="confirm-dialog-content">
               <h3>Start New Chat?</h3>
               <p>This will clear your current conversation.</p>
+
               <div className="confirm-buttons">
                 <button
                   onClick={confirmNewChat}

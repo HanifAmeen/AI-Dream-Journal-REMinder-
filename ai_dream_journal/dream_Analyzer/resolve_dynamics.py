@@ -1,7 +1,7 @@
 import re
 from symbol_emotion_map import SYMBOL_EMOTION_MAP
 
-# ✅ STEP 1: EXPANDED Motion Detection
+#  STEP 1: EXPANDED Motion Detection
 MOTION_VERBS = {
     "run","running","ran",
     "chase","chased",
@@ -36,7 +36,7 @@ def resolve_symbol_emotion_dynamics(insight: dict, dream_text: str):
     text = dream_text.lower()
     has_motion = any(contains_word(text, v) for v in MOTION_VERBS)
 
-    # ✅ STEP 5: Late-narrative weighting
+    #  STEP 5: Late-narrative weighting
     words = text.split()
     last_third = words[int(len(words) * 0.66):]
     late_text = " ".join(last_third)
@@ -45,11 +45,11 @@ def resolve_symbol_emotion_dynamics(insight: dict, dream_text: str):
 
     # Main symbol-emotion loop with fallbacks
     for symbol, score in symbol_scores.items():
-        # ✅ STEP 2: Stricter baseline threshold
+        #  STEP 2: Stricter baseline threshold
         if score < 0.35:
             continue
 
-        # ✅ STEP 1: Emotion fallback logic
+        #  STEP 1: Emotion fallback logic
         key = (symbol, dominant_emotion)
         if key in SYMBOL_EMOTION_MAP:
             mapping = SYMBOL_EMOTION_MAP[key]
@@ -61,7 +61,7 @@ def resolve_symbol_emotion_dynamics(insight: dict, dream_text: str):
 
         dynamic = mapping["dynamic"]
 
-        # ✅ STEP 3: FIXED - Only pursuit/escape require motion
+        #  STEP 3: FIXED - Only pursuit/escape require motion
         if dynamic in {"pursuit", "escape"}:
             if not has_motion:
                 continue
@@ -70,7 +70,7 @@ def resolve_symbol_emotion_dynamics(insight: dict, dream_text: str):
         if word_count < 12 and score < 0.45:
             continue
 
-        # ✅ STEP 2: Include symbol strength
+        #  STEP 2: Include symbol strength
         dynamics.append({
             "symbol": symbol,
             "emotion": dominant_emotion,
@@ -79,7 +79,7 @@ def resolve_symbol_emotion_dynamics(insight: dict, dream_text: str):
             "strength": score  # NEW: Preserve intensity
         })
 
-    # ✅ STEP 3: Structural threat detection (WORD-BOUNDARY SAFE ✅)
+    #  STEP 3: Structural threat detection (WORD-BOUNDARY SAFE )
     confinement_words = ["trapped", "locked", "inside", "closed"]
     pursuit_words = ["chase", "chased", "pursued"]
     escape_words = ["escape", "exit", "outside"]
@@ -88,7 +88,7 @@ def resolve_symbol_emotion_dynamics(insight: dict, dream_text: str):
     has_pursuit_word = any(contains_word(text, w) for w in pursuit_words)
     has_escape_word = any(contains_word(text, w) for w in escape_words)
 
-    # ✅ IMPROVEMENT 2: FIXED - Lower narrative strength to 0.45
+    #  IMPROVEMENT 2: FIXED - Lower narrative strength to 0.45
     if has_pursuit_word:
         dynamics.append({
             "symbol": "narrative",
@@ -116,7 +116,7 @@ def resolve_symbol_emotion_dynamics(insight: dict, dream_text: str):
             "strength": 0.45  # Lowered from 0.55
         })
 
-    # ✅ STEP 5: Late-narrative resolution detection (WORD-BOUNDARY SAFE)
+    #  STEP 5: Late-narrative resolution detection (WORD-BOUNDARY SAFE)
     resolution_words = ["safe", "outside", "relieved", "calm"]
     if any(contains_word(late_text, w) for w in resolution_words):
         dynamics.append({
@@ -127,7 +127,7 @@ def resolve_symbol_emotion_dynamics(insight: dict, dream_text: str):
             "strength": 0.45  # Lowered from 0.55
         })
 
-    # ✅ STEP 4: Remove duplicate dynamics (keep strongest)
+    #  STEP 4: Remove duplicate dynamics (keep strongest)
     unique = {}
     for d in dynamics:
         dyn = d["dynamic"]

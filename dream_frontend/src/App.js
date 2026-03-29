@@ -22,7 +22,7 @@ import Footer from "./components/Common/Footer/footer";
 
 import { authHeaders, logout } from "./auth";
 import "./App.css";
-const API_URL = "http://104.236.119.70:5000";
+const API_URL = "http://localhost:5000";
 
 function App() {
   const [dreams, setDreams] = useState([]);
@@ -36,7 +36,7 @@ function App() {
 
   const fetchDreams = async () => {
     try {
-      const res = await fetch("/get_dreams", {
+      const res = await fetch(`${API_URL}/get_dreams`, {
         method: "GET",
         headers: authHeaders(),
       });
@@ -55,7 +55,7 @@ function App() {
 
   const addDream = async ({ title, content, mood, use_profile }) => {
     try {
-      const res = await fetch("/add_dream", {
+      const res = await fetch(`${API_URL}/add_dream`, {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify({

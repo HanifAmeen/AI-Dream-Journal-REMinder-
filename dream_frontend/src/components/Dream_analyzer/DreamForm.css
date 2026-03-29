@@ -219,34 +219,92 @@ body {
 /*            LOADER             */
 /* ============================= */
 
-.loader {
-  margin: 20px auto;
-  width: 32px;
-  height: 32px;
+/* ============================= */
+/*        AI LOADER (NEW)        */
+/* ============================= */
 
-  border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top: 3px solid var(--mk-glow-purple);
+.ai-loader {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  animation: fadeIn 0.5s ease;
+}
 
+/* Brain core */
+.brain {
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  background: radial-gradient(circle, #6a1b9a 20%, #0f0f1a 70%);
   position: relative;
+  box-shadow:
+    0 0 30px rgba(106, 27, 154, 0.8),
+    inset 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
-.loader::after {
-  content: '';
+/* Pulsing rings */
+.pulse {
   position: absolute;
-  top: 50%;
-  left: 50%;
-
-  width: 12px;
-  height: 12px;
-
-  background: var(--mk-glow-purple);
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
-
-  transform: translate(-50%, -50%);
-  animation: pulse 1.5s infinite;
+  border: 2px solid rgba(106, 27, 154, 0.6);
+  animation: ripple 2s infinite;
 }
+
+.pulse.delay {
+  animation-delay: 1s;
+}
+
+/* Text */
+.loading-text {
+  font-size: 14px;
+  color: var(--mk-text-secondary);
+  text-align: center;
+  max-width: 260px;
+  line-height: 1.5;
+  animation: glowText 2s infinite alternate;
+}
+
+/* ============================= */
+/*         ANIMATIONS            */
+/* ============================= */
+
+@keyframes ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@keyframes glowText {
+  from {
+    opacity: 0.6;
+    text-shadow: 0 0 5px rgba(106, 27, 154, 0.4);
+  }
+  to {
+    opacity: 1;
+    text-shadow: 0 0 15px rgba(106, 27, 154, 0.9);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
 /* ============================= */
 /*        MIC RECORDING          */

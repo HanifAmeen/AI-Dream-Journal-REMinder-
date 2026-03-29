@@ -1,39 +1,40 @@
+/* FOOTER BASE */
 .footer {
   background: linear-gradient(180deg, #0b0b0b, #070707);
-  padding: 35px 20px;
+  padding: 40px 20px;
   text-align: center;
   color: #ffffff;
   border-top: 1px solid rgba(255,255,255,0.08);
 }
 
-/* Social Icons */
-
+/* SOCIAL ICONS */
 .footer-icons {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 28px;
+  gap: 26px;
   margin-bottom: 22px;
+  flex-wrap: wrap;
 }
 
 .footer-icons a {
   color: #ffffff;
-  font-size: 22px;
+  font-size: 24px;
   transition: all 0.25s ease;
+  padding: 8px; /* improves tap area */
 }
 
 .footer-icons a:hover {
   transform: translateY(-3px) scale(1.15);
-  color: #a78bfa; /* subtle accent */
+  color: #a78bfa;
 }
 
-/* Footer Links */
-
+/* FOOTER LINKS */
 .footer-links {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 26px;
+  gap: 24px;
   margin-bottom: 18px;
 }
 
@@ -43,10 +44,10 @@
   text-decoration: none;
   position: relative;
   transition: color 0.25s ease;
+  padding: 6px 4px; /* better click area */
 }
 
-/* underline hover animation */
-
+/* underline animation */
 .footer-links a::after {
   content: "";
   position: absolute;
@@ -66,24 +67,57 @@
   width: 100%;
 }
 
-/* Copyright */
-
+/* COPYRIGHT */
 .footer-copy {
   font-size: 13px;
   color: #b5b5b5;
   opacity: 0.8;
-  margin-top: 12px;
+  margin-top: 14px;
 }
 
-/* Responsive */
+/* ================= RESPONSIVE ================= */
 
-@media (max-width: 600px) {
-  .footer-links {
-    flex-direction: column;
-    gap: 12px;
+/* Tablets */
+@media (max-width: 900px) {
+  .footer {
+    padding: 35px 15px;
   }
 
   .footer-icons {
-    gap: 20px;
+    gap: 22px;
+  }
+
+  .footer-links {
+    gap: 18px;
+  }
+}
+
+/* Phones */
+@media (max-width: 600px) {
+
+  .footer {
+    padding: 30px 15px;
+  }
+
+  .footer-icons {
+    gap: 18px;
+  }
+
+  .footer-icons a {
+    font-size: 22px;
+    padding: 10px; /* bigger tap targets */
+  }
+
+  .footer-links {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .footer-links a {
+    font-size: 14px;
+  }
+
+  .footer-copy {
+    font-size: 12px;
   }
 }

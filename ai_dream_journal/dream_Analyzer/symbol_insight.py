@@ -14,7 +14,7 @@ def build_symbol_insight(
     print(f"DEBUG: Incoming symbol_scores: {symbol_scores}")
 
     # --- Config ---
-    base_min_score = 0.40          # ✅ Keep as is - healthy cutoff
+    base_min_score = 0.40          #  Keep as is - healthy cutoff
     strong_similarity = 0.60       # Strong semantic override threshold
     gap_threshold = 0.06           # Slightly safer separation margin
 
@@ -48,7 +48,7 @@ def build_symbol_insight(
     for sym, score in symbol_scores.items():
         adjusted = score
 
-        # Penalize abstract symbols in short dreams ✅ Keep as is
+        # Penalize abstract symbols in short dreams  Keep as is
         if sym in ABSTRACT_SYMBOLS and word_count < 20:
             adjusted *= 0.6
 
@@ -71,7 +71,7 @@ def build_symbol_insight(
         sym_clean = sym.replace("_", " ")
         sym_lemma = lemmatizer.lemmatize(sym_clean)
 
-        # ✅ STEP 2: FIXED High-risk symbol detection (flexible matching)
+        #  STEP 2: FIXED High-risk symbol detection (flexible matching)
         if sym in HIGH_RISK_SYMBOLS:
             if not any(word in dream_tokens for word in sym_clean.split()):
                 continue
@@ -100,7 +100,7 @@ def build_symbol_insight(
             "dominant_emotion": dominant_emotion
         }
 
-    # ✅ STEP 1: FIXED - Collapse to 2 instead of 1 (keep multiple strong symbols)
+    #  STEP 1: FIXED - Collapse to 2 instead of 1 (keep multiple strong symbols)
     if len(grounded) >= 3:
         if grounded[0][1] - grounded[2][1] < gap_threshold:
             grounded = grounded[:2]  # Changed from [:1] to [:2]

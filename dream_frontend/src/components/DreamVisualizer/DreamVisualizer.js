@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "./DreamVisualizer.css";
-const API_URL = "http://104.236.119.70:5000";
+const API_URL = "http://localhost:5000";
 
 function DreamVisualizer() {
   const [dream, setDream] = useState("");

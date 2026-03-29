@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "./DreamForm.css";
 import HelpGuide from "./helpGuide";
 
@@ -7,11 +7,41 @@ function DreamForm({ onAdd }) {
   const [content, setContent] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState(""); // NEW: Loading message state
   const [isRecording, setIsRecording] = useState(false);
   const [useProfile, setUseProfile] = useState(true);
 
   const recognitionRef = useRef(null);
   const autoRestartRef = useRef(false);
+
+  // NEW: Animated loader messages useEffect
+  useEffect(() => {
+    let timers = [];
+
+    if (loading) {
+      setLoadingMessage("🧠 Analyzing your dream deeply...");
+
+      timers.push(
+        setTimeout(() => {
+          setLoadingMessage("✨ Almost done... uncovering hidden meanings...");
+        }, 60000)
+      );
+
+      timers.push(
+        setTimeout(() => {
+          setLoadingMessage("🔮 Finalizing your dream interpretation...");
+        }, 120000)
+      );
+
+      timers.push(
+        setTimeout(() => {
+          setLoadingMessage("🚀 Just a few more seconds...");
+        }, 180000)
+      );
+    }
+
+    return () => timers.forEach(clearTimeout);
+  }, [loading]);
 
   const initSpeechRecognition = () => {
     const SpeechRecognition =
@@ -148,7 +178,6 @@ function DreamForm({ onAdd }) {
       <HelpGuide />
 
       <div className="dream-form-container">
-
         <div className="dream-form-header">
           <h2 className="dream-form-title">
             Add Your Dream
@@ -159,7 +188,6 @@ function DreamForm({ onAdd }) {
           onSubmit={handleSubmit}
           className="dream-form"
         >
-
           <input
             type="text"
             placeholder="Dream title"
@@ -182,7 +210,6 @@ function DreamForm({ onAdd }) {
           />
 
           <div className="dream-buttons">
-
             <button
               type="submit"
               className="dream-button"
@@ -208,7 +235,6 @@ function DreamForm({ onAdd }) {
             >
               Clear
             </button>
-
           </div>
 
           <div className="profile-toggle">
@@ -221,11 +247,20 @@ function DreamForm({ onAdd }) {
               Personalize interpretation using my profile
             </label>
           </div>
-
         </form>
 
+        {/* UPDATED: New animated AI loader */}
         {loading && (
-          <div className="loader"></div>
+          <div className="ai-loader">
+            <div className="brain">
+              <div className="pulse"></div>
+              <div className="pulse delay"></div>
+            </div>
+
+            <p className="loading-text">
+              {loadingMessage}
+            </p>
+          </div>
         )}
 
         {message && (
@@ -233,7 +268,6 @@ function DreamForm({ onAdd }) {
             {message}
           </p>
         )}
-
       </div>
     </>
   );

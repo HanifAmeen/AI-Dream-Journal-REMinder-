@@ -96,24 +96,56 @@ def generate_llm_interpretation(
         religion = user_profile.get("religion", "unknown")
 
         user_context = f"""
-CRITICAL INTERPRETATION RULE
+CRITICAL INTERPRETATION RULE — DEEP PROFILE INTEGRATION
 
-The interpretation MUST consider the dreamer's demographic background.
+The dreamer's background MUST shape the interpretation in a NATURAL and CONTINUOUS way.
 
-When analyzing symbols and emotions:
+DO NOT:
+- Insert a single explicit sentence like "Considering your background..."
+- Mention the profile only once
+- Force cultural or religious meaning where it does not fit
 
-• Age may influence life-stage concerns (identity, relationships, responsibility).
-• Gender may influence how vulnerability, conflict, or social roles are experienced.
-• Nationality and culture may influence symbolic meanings of animals, places, or social situations.
-• Religion or spiritual background may influence how symbols are understood (spiritual guidance, morality, transformation).
+INSTEAD:
+- Subtly weave the dreamer's background into MULTIPLE parts of the interpretation
+- Let it influence tone, meaning, and psychological framing throughout ALL sections
 
-When appropriate, adjust the psychological meaning of symbols according to these contextual factors.
+INTEGRATION GUIDELINES:
+
+1. Age:
+   - Reflect life stage (identity, responsibility, growth, uncertainty)
+   - Influence interpretation of progress, fear, or development
+
+2. Gender:
+   - Shape experiences of vulnerability, pressure, expectations, or self-expression
+   - Do NOT stereotype — keep it psychological, not social clichés
+
+3. Nationality / Culture:
+   - ONLY influence interpretation if relevant to symbols (places, authority, social structure)
+   - Otherwise keep influence subtle (e.g., sense of structure, discipline, expectations)
+
+4. Religion / Spirituality:
+   - Integrate into meaning of:
+     - conscience
+     - guidance
+     - morality
+     - inner voice
+   - DO NOT force religious meaning unless it fits the dream context
+
+CRITICAL STYLE RULE:
+The dreamer's profile should feel like an invisible lens shaping the interpretation — not something explicitly announced.
+
+BAD EXAMPLE:
+"Considering your Christian background..."
+
+GOOD EXAMPLE:
+- References to inner guidance, moral reflection, or conscience woven naturally
+- Subtle influence across multiple sections
 
 DREAMER PROFILE:
 Gender: {gender}
-Age: {age} 
-Nationality / Cultural background: {nationality}
-Religion / Spiritual background: {religion}
+Age: {age}
+Nationality: {nationality}
+Religion: {religion}
 """
 
         # Also add to ANALYSIS SIGNALS section

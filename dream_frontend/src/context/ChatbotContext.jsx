@@ -13,15 +13,16 @@ export function ChatbotProvider({ children }) {
   return (
     <ChatbotContext.Provider
       value={{
-        isOpen,
-        toggleChat,
-        messages,
-        setMessages,
-        pendingQuestion,
-        setPendingQuestion,
-        isTyping,
-        setIsTyping
-      }}
+  isOpen,
+  setIsOpen,   
+  toggleChat,
+  messages,
+  setMessages,
+  pendingQuestion,
+  setPendingQuestion,
+  isTyping,
+  setIsTyping
+}}
     >
       {children}
     </ChatbotContext.Provider>

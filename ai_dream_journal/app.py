@@ -1,6 +1,6 @@
 import sys
 import os
-os.environ["PYTHONLEGACYWINDOWSSTDIO"] = "1"  # ✅ FIX #1: Windows console crash
+os.environ["PYTHONLEGACYWINDOWSSTDIO"] = "1"  
 from pathlib import Path
 import re
 from collections import Counter
@@ -10,8 +10,8 @@ from nltk.corpus import wordnet
 from typing import List, Dict, Optional
 import pandas as pd
 from datetime import datetime, timedelta
-import uuid  # ✅ MOVED UP - NEEDED FOR BATCHING
-import numpy as np  # MOVED UP - NEEDED FOR DREAMBANK
+import uuid  
+import numpy as np  
 from flask import redirect
 from flask_mail import Mail, Message
 
@@ -84,15 +84,9 @@ def ensure_json(value):
         return value
     return {}
 
-# -------------------------------------------------
-# 🔧 FIX #2 - EXPANDED WEAK SYMBOLS FILTER (100+ entries) ✅ APPLIED
-# -------------------------------------------------
-WEAK_SYMBOLS = {
-    # (intentionally left commented out / empty in your snippet)
-}
 
 # -------------------------------------------------
-# 📦 AUTOMATIC SYMBOL CLASSIFICATION (SCALABLE ✅)
+# 📦 AUTOMATIC SYMBOL CLASSIFICATION (SCALABLE )
 # -------------------------------------------------
 ABSTRACT_SYMBOLS = {
     "pursuit", "avoidance", "searching", "stagnation", "transition",
@@ -143,18 +137,18 @@ symbol_names = (
 
 print(f"Loaded {len(symbol_names)} lemmatized symbols from dataset")
 
-# ✅ MODEL + EMBEDDINGS
+#  MODEL + EMBEDDINGS
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 symbol_embeddings = model.encode(symbol_names, normalize_embeddings=True)
 print(f"Symbol embeddings shape: {symbol_embeddings.shape}")
 
-# ✅ FIXED: Proper set operations for CONCRETE_SYMBOLS
+#  Proper set operations for CONCRETE_SYMBOLS
 CONCRETE_SYMBOLS = set(symbol_names) - set(ABSTRACT_SYMBOLS)
 
 print(f"Concrete symbols count: {len(CONCRETE_SYMBOLS)}")
 
 # -------------------------------------------------
-# 🌙 DREAM SIMILARITY DATA  ✅ NEW
+# 🌙 DREAM SIMILARITY DATA 
 # -------------------------------------------------
 DREAMBANK_PATH = BASE_DIR / "datasets" / "dreambank_processed_full.csv"
 DREAMBANK_EMBED_PATH = BASE_DIR / "datasets" / "dreambank_embeddings.npy"
@@ -180,7 +174,7 @@ else:
     dream_similarity_engine = None
 
 # -------------------------------------------------
-# 🧠 ADVANCED SCORING WITH ALL 3 FIXES ✅
+# 🧠 ADVANCED SCORING 
 # -------------------------------------------------
 def compute_hybrid_symbol_scores(dream_text: str):
     """🔧 ALL FIXES: Reduced living boost + Weak filter + Top-200 optimization"""
@@ -200,7 +194,7 @@ def compute_hybrid_symbol_scores(dream_text: str):
     for idx in top_indices:
         symbol = symbol_names[idx]
 
-        # 🔧 FIX #2: Filter weak symbols BEFORE scoring ✅ APPLIED
+        #  Filter weak symbols BEFORE scoring 
         if symbol in WEAK_SYMBOLS:
             continue
 
@@ -242,9 +236,9 @@ def compute_hybrid_symbol_scores(dream_text: str):
         elif symbol in ABSTRACT_SYMBOLS:
             concrete_boost -= 0.05
 
-        # 🔧 FIX #1: REDUCED LIVING BOOST (0.35 → 0.10) ✅ APPLIED
+        # 🔧  REDUCED LIVING BOOST (0.35 → 0.10) 
         if is_living_entity(symbol):
-            living_boost += 0.10  # ✅ FIXED
+            living_boost += 0.10  
 
         final_score = (
             base_score + lexical_boost + repetition_boost +
@@ -267,10 +261,16 @@ def detect_resolution(text: str):
 SECRET_KEY = os.environ.get("REMINDER_SECRET_KEY", "CHANGE_THIS_SECRET")
 
 app = Flask(__name__)
-CORS(app)
+CORS(
+    app,
+    resources={r"/*": {"origins": "*"}},
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    supports_credentials=True
+)
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{BASE_DIR / 'dreams.db'}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config["EMAIL_VERIFICATION_ENABLED"] = False
+app.config["EMAIL_VERIFICATION_ENABLED"] = True
 
 app.config["MAIL_SERVER"] = "smtp.gmail.com"
 app.config["MAIL_PORT"] = 587
@@ -285,18 +285,18 @@ db = SQLAlchemy(app)
 mail = Mail(app)
 
 # -------------------------------------------------
-# ✅ UPDATED MODELS WITH DREAM_SIMILARITY
+#  UPDATED MODELS WITH DREAM_SIMILARITY
 # -------------------------------------------------
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
-    dob = db.Column(db.String(20))  # ✅ NEW: Date of birth
-    age = db.Column(db.String(10))  # ✅ NEW: Age
-    nationality = db.Column(db.String(100))  # ✅ NEW: Nationality
-    gender = db.Column(db.String(20))  # ✅ NEW: Gender
-    religion = db.Column(db.String(20))  # ✅ NEW: Religion (was Star sign)
+    dob = db.Column(db.String(20))  #   Date of birth
+    age = db.Column(db.String(10))  # : Age
+    nationality = db.Column(db.String(100))  #  Nationality
+    gender = db.Column(db.String(20))  #  Gender
+    religion = db.Column(db.String(20))  #  Religion 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_verified = db.Column(db.Boolean, default=False)
     verification_token = db.Column(db.String(200))
@@ -317,7 +317,7 @@ class Dream(db.Model):
     trauma_level = db.Column(db.String(20), default="Low")
     analysis_version = db.Column(db.String(80))
     user_profile_used = db.Column(db.Boolean, default=False)
-    dream_similarity = db.Column(db.Float, default=0.0)  # ✅ NEW COLUMN ADDED
+    dream_similarity = db.Column(db.Float, default=0.0)  
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
 class DreamImage(db.Model):
@@ -333,7 +333,7 @@ class DreamImage(db.Model):
 def migrate_database():
     try:
         with app.app_context():
-            with db.engine.connect() as conn:  # ✅ FIXED: Proper connection context
+            with db.engine.connect() as conn:  
                 result = conn.exec_driver_sql("PRAGMA table_info(dream_image)").fetchall()
                 columns = [row[1] for row in result]
 
@@ -361,14 +361,14 @@ def migrate_database():
                         conn.exec_driver_sql(f"ALTER TABLE user ADD COLUMN {col} TEXT")
                         print(f"✅ {col} column added!")
 
-                # ✅ NEW: Add user_profile_used column to dreams table if missing
+                #  Add user_profile_used column to dreams table if missing
                 dream_columns = [row[1] for row in conn.exec_driver_sql("PRAGMA table_info(dream)").fetchall()]
                 if "user_profile_used" not in dream_columns:
                     print("🔧 Adding user_profile_used column to dream table...")
                     conn.exec_driver_sql("ALTER TABLE dream ADD COLUMN user_profile_used BOOLEAN DEFAULT 0")
                     print("✅ user_profile_used column added!")
 
-                # ✅ NEW: Add dream_similarity column if missing
+                #  Add dream_similarity column if missing
                 dream_columns = [row[1] for row in conn.exec_driver_sql("PRAGMA table_info(dream)").fetchall()]
                 if "dream_similarity" not in dream_columns:
                     print("🔧 Adding dream_similarity column to dream table...")
@@ -431,7 +431,7 @@ def update_profile():
     gender = data.get("gender")
     religion = data.get("religion")
 
-    user = db.session.get(User, request.user_id)  # ✅ MODERNIZED: db.session.get()
+    user = db.session.get(User, request.user_id)  #  MODERNIZED: db.session.get()
     if not user:
         return jsonify({"error": "User not found"}), 404
 
@@ -454,7 +454,7 @@ def update_profile():
 @auth_required
 def get_profile():
     """✅ NEW: Get user profile"""
-    user = db.session.get(User, request.user_id)  # ✅ MODERNIZED: db.session.get()
+    user = db.session.get(User, request.user_id)  #  MODERNIZED: db.session.get()
     if not user:
         return jsonify({}), 404
 
@@ -467,12 +467,12 @@ def get_profile():
     })
 
 # -------------------------------------------------
-# 🧠 ENHANCED ANALYSIS WITH PERSONALIZATION + DREAMBANK SIMILARITY ✅
+# 🧠 ENHANCED ANALYSIS WITH PERSONALIZATION + DREAMBANK SIMILARITY 
 # -------------------------------------------------
 def analyze_dream_runtime(dream_text: str, user_id: int, use_profile: bool = True):
     """🔧 ALL FIXES + 🌙 DREAMBANK SIMILARITY"""
     try:
-        # ✅ CRITICAL: Get user profile for personalization (MODERNIZED)
+        #  CRITICAL: Get user profile for personalization (MODERNIZED)
         user_profile = None
 
         if use_profile:
@@ -493,7 +493,7 @@ def analyze_dream_runtime(dream_text: str, user_id: int, use_profile: bool = Tru
         raw_dominant, emotion_scores, emotion_conf = detect_emotion_with_scores(dream_text)
         
         # -------------------------------------------------
-        # 🌙 DREAM SIMILARITY  ✅ NEW
+        # 🌙 DREAM SIMILARITY  
         # -------------------------------------------------
         top_similarity = 0.0
         similar_dream_text = None
@@ -538,12 +538,12 @@ def analyze_dream_runtime(dream_text: str, user_id: int, use_profile: bool = Tru
             symbol_prominence = {}
             avg_symbol_prominence = 0.0
         else:
-            # 🔧 FIX #3: Normalize top 5 symbols to 1.00 max scale ✅ APPLIED
+            # 🔧 FIX #3: Normalize top 5 symbols to 1.00 max scale 
             ranked_top = sorted(grounded_symbols.items(), key=lambda x: x[1], reverse=True)[:12]
             if ranked_top:
                 max_score = max(v for _, v in ranked_top) or 1
                 top_symbols = {
-                    s: round(v / max_score, 2)  # ✅ Scales highest to 1.00
+                    s: round(v / max_score, 2)  #  Scales highest to 1.00
                     for s, v in ranked_top
                 }
             else:
@@ -594,7 +594,7 @@ def analyze_dream_runtime(dream_text: str, user_id: int, use_profile: bool = Tru
             len(grounded_symbols)
         )
 
-        # ✅ CRITICAL: Pass user_profile to generate_interpretation
+        #  CRITICAL: Pass user_profile to generate_interpretation
         interpretation = generate_interpretation(
             dynamics=dynamics,
             dream_text=dream_text,
@@ -604,18 +604,18 @@ def analyze_dream_runtime(dream_text: str, user_id: int, use_profile: bool = Tru
             user_profile=user_profile  # 🎯 THIS IS THE MISSING PIECE!
         )
 
-        # ✅ FIXED: Return actual profile usage status
+        #  FIXED: Return actual profile usage status
         profile_was_used = bool(user_profile)
 
         return {
             "dominant_emotion": str(dominant_emotion),
             "trajectory": ensure_json(trajectory),
-            "symbols": ensure_json(top_symbols),  # ✅ Normalized 0-1 scale
-            "symbol_prominence": symbol_prominence,  # ✅ Percentage scale
+            "symbols": ensure_json(top_symbols),  #  Normalized 0-1 scale
+            "symbol_prominence": symbol_prominence,  #  Percentage scale
             "avg_symbol_prominence": avg_symbol_prominence,
             "interpretation": ensure_string(interpretation),
             
-            # ✅ NEW: DreamBank similarity results
+            #  NEW: DreamBank similarity results
             "dream_similarity": round(top_similarity, 2),
             "similar_dream_example": similar_dream_text[:200] if similar_dream_text else None,
             
@@ -625,8 +625,8 @@ def analyze_dream_runtime(dream_text: str, user_id: int, use_profile: bool = Tru
             },
             "trauma_score": float(trauma_score),
             "trauma_level": trauma_level,
-            "analysis_version": "v11_dreambank_similarity",  # ✅ Updated version
-            "user_profile_used": profile_was_used  # ✅ CORRECT: Actual boolean value
+            "analysis_version": "v11_dreambank_similarity",  #  Updated version
+            "user_profile_used": profile_was_used  #  CORRECT: Actual boolean value
         }
     except Exception as e:
         print("ANALYZER ERROR:", str(e))
@@ -638,7 +638,7 @@ def analyze_dream_runtime(dream_text: str, user_id: int, use_profile: bool = Tru
             "symbol_prominence": {},
             "avg_symbol_prominence": 0.0,
             "interpretation": "Analysis encountered an issue. The dream reflects complex emotional processing.",
-            "dream_similarity": 0.0,  # ✅ Added to fallback
+            "dream_similarity": 0.0,  #  
             "similar_dream_example": None,
             "confidence": {"symbol": 0.0, "overall": 0.0},
             "trauma_score": 0.0,
@@ -648,7 +648,7 @@ def analyze_dream_runtime(dream_text: str, user_id: int, use_profile: bool = Tru
         }
 
 # -------------------------------------------------
-# IMAGE ROUTES - ✅ FIXED get_visualizations ENDPOINT
+# IMAGE ROUTES -  FIXED get_visualizations ENDPOINT
 # -------------------------------------------------
 @app.route("/dream_images/<path:filename>")
 def serve_dream_image(filename):
@@ -657,7 +657,7 @@ def serve_dream_image(filename):
 @app.route("/get_visualizations", methods=["GET"])
 @auth_required
 def get_visualizations():
-    """✅ FIXED: Enrich ALL batches with dream_text - SIMPLE IMPLEMENTATION"""
+    """ FIXED: Enrich ALL batches with dream_text - SIMPLE IMPLEMENTATION"""
     try:
         images = DreamImage.query.filter_by(user_id=request.user_id)\
             .order_by(DreamImage.created_at.desc()).all()
@@ -684,7 +684,7 @@ def get_visualizations():
             reverse=True
         )
 
-        # ✅ SIMPLE FIX: Add dream_text to ALL batches (empty string for old batches)
+        # SIMPLE FIX: Add dream_text to ALL batches (empty string for old batches)
         for batch in batch_list:
             batch["dream_text"] = ""  # Empty string - frontend will show nothing for old batches
 
@@ -865,7 +865,7 @@ def login():
     })
 
 # -------------------------------------------------
-# 💭 DREAM ROUTES - ✅ FULLY UPDATED WITH DREAMBANK SIMILARITY!
+# 💭 DREAM ROUTES -  FULLY UPDATED WITH DREAMBANK SIMILARITY!
 # -------------------------------------------------
 @app.route("/add_dream", methods=["POST"])
 @auth_required
@@ -874,14 +874,14 @@ def add_dream():
     content = data.get("content", "").strip()
     title = data.get("title", "Untitled Dream")
 
-    # ✅ NEW: allow frontend to choose whether to use profile
+    #  NEW: allow frontend to choose whether to use profile
     use_profile = data.get("use_profile", True)
 
     if not content:
         return jsonify({"error": "Dream content required"}), 400
 
     try:
-        # ✅ CRITICAL: Pass user_id and use_profile to analysis function
+        #  CRITICAL: Pass user_id and use_profile to analysis function
         result = analyze_dream_runtime(content, request.user_id, use_profile)
     except Exception:
         traceback.print_exc()
@@ -901,7 +901,7 @@ def add_dream():
         trauma_level=result.get("trauma_level", "Low"),
         analysis_version=result["analysis_version"],
         user_profile_used=result["user_profile_used"],
-        dream_similarity=result.get("dream_similarity", 0.0),  # ✅ NEW: NOW STORED IN DB
+        dream_similarity=result.get("dream_similarity", 0.0),  #  
         user_id=request.user_id
     )
 
@@ -911,7 +911,7 @@ def add_dream():
     return jsonify({
         "message": "Dream saved with personalized interpretation + DreamBank similarity",
         "profile_used": result.get("user_profile_used", False),
-        "dream_similarity": result.get("dream_similarity", 0.0)  # ✅ NEW
+        "dream_similarity": result.get("dream_similarity", 0.0)  #  
     }), 201
 
 @app.route("/get_dreams", methods=["GET"])
@@ -938,17 +938,45 @@ def get_dreams():
             "analysis_version": d.analysis_version,
             "user_profile_used": d.user_profile_used,
             
-            # ✅ FIXED: Now stored in DB column - direct access
+            #  Now stored in DB column - direct access
             "dream_similarity": d.dream_similarity,
             "similar_dream_example": getattr(d, "similar_dream_example", None)  # still only in runtime
         }
         for d in dreams
     ])
+@app.route("/delete_account", methods=["DELETE"])
+@auth_required
+def delete_account():
+    try:
+        user_id = request.user_id
 
+        #  Delete related data first
+        DreamImage.query.filter_by(user_id=user_id).delete()
+        Dream.query.filter_by(user_id=user_id).delete()
+
+        # Optional: chatbot history (if exists)
+        try:
+            ChatConversation.query.filter_by(user_id=user_id).delete()
+        except:
+            pass
+
+        #  Delete user
+        user = db.session.get(User, user_id)
+        if user:
+            db.session.delete(user)
+
+        db.session.commit()
+
+        return jsonify({"message": "Account deleted successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print("DELETE ACCOUNT ERROR:", e)
+        return jsonify({"error": "Failed to delete account"}), 500
 @app.route("/delete_dream/<int:dream_id>", methods=["DELETE"])
 @auth_required
 def delete_dream(dream_id):
-    dream = db.session.get(Dream, dream_id)  # ✅ MODERNIZED
+    dream = db.session.get(Dream, dream_id)  #  MODERNIZED
     if not dream:
         return jsonify({"error": "Dream not found"}), 404
     if dream.user_id != request.user_id:
@@ -959,6 +987,7 @@ def delete_dream(dream_id):
     return jsonify({"message": "Dream deleted"})
 
 app.register_blueprint(chatbot_bp)
+
 
 @app.route("/")
 def home():

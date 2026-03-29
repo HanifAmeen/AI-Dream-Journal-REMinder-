@@ -5,6 +5,11 @@
   box-sizing: border-box;
 }
 
+html {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(138, 43, 226, 0.9) rgba(15, 15, 25, 0.4) !important;
+}
+
 .home-container {
   min-height: 100vh;
   font-family: 'Orbitron', 'Segoe UI', Tahoma, sans-serif;
@@ -12,10 +17,10 @@
   overflow-x: hidden;
 }
 
-/* Hero Background - Dream Nebula Sky */
+/* ========================= HERO SECTION ========================= */
 .hero-background {
   position: relative;
-  height: 100vh;
+  min-height: 100vh;
   background: linear-gradient(135deg, #2f195b 0%, #8e24aa 50%, #b71c7c 100%);
   display: flex;
   align-items: center;
@@ -83,55 +88,24 @@
 }
 
 /* Individual Symbol Positions & Speeds */
-.moon {
-  left: 10%;
-  animation-duration: 26s;
-}
-
-.eye {
-  left: 30%;
-  animation-duration: 30s;
-}
-
-.key {
-  left: 50%;
-  animation-duration: 24s;
-}
-
-.door {
-  left: 70%;
-  animation-duration: 32s;
-}
-
-.stairs {
-  left: 85%;
-  animation-duration: 28s;
-}
-
-.water {
-  left: 15%;
-  animation-duration: 34s;
-}
-
-.mask {
-  left: 60%;
-  animation-duration: 27s;
-}
+.moon { left: 10%; animation-duration: 26s; }
+.eye { left: 30%; animation-duration: 30s; }
+.key { left: 50%; animation-duration: 24s; }
+.door { left: 70%; animation-duration: 32s; }
+.stairs { left: 85%; animation-duration: 28s; }
+.water { left: 15%; animation-duration: 34s; }
+.mask { left: 60%; animation-duration: 27s; }
 
 @keyframes floatSymbol {
   0% {
     transform: translate(0, 100vh) rotate(0deg);
     opacity: 0;
   }
-  15% {
-    opacity: 0.9;
-  }
+  15% { opacity: 0.9; }
   50% {
     transform: translate(20px, 30vh) rotate(180deg);
   }
-  85% {
-    opacity: 0.9;
-  }
+  85% { opacity: 0.9; }
   100% {
     transform: translate(-20px, -20vh) rotate(360deg);
     opacity: 0;
@@ -154,16 +128,12 @@
 /* Hero overlay */
 .hero-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: 
-    radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(200,146,255,0.15) 0%, transparent 50%),
+    radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1), transparent),
+    radial-gradient(circle at 80% 20%, rgba(200,146,255,0.15), transparent),
     linear-gradient(45deg, rgba(47,25,91,0.6), rgba(11,15,26,0.75));
   z-index: 2;
-  pointer-events: none;
 }
 
 .hero-overlay::after {
@@ -174,7 +144,6 @@
     radial-gradient(circle at 50% 60%, rgba(200,146,255,0.25), transparent 60%),
     radial-gradient(circle at 20% 40%, rgba(255,255,255,0.12), transparent 60%);
   animation: fogMove 20s ease-in-out infinite alternate;
-  pointer-events: none;
 }
 
 @keyframes fogMove {
@@ -191,7 +160,7 @@
 }
 
 .hero-title {
-  font-size: clamp(3rem, 8vw, 6rem);
+  font-size: clamp(2.5rem, 8vw, 6rem);
   font-weight: 700;
   background: linear-gradient(45deg, #ffffff, #e0e0ff, #c892ff);
   -webkit-background-clip: text;
@@ -203,22 +172,28 @@
 }
 
 .hero-subtitle {
-  font-size: clamp(1.2rem, 3vw, 2rem);
+  font-size: clamp(1rem, 3vw, 2rem);
   opacity: 0.9;
   max-width: 600px;
   margin: 0 auto;
 }
 
-/* Main Content */
+@keyframes glowPulse {
+  0%, 100% { 
+    filter: drop-shadow(0 0 20px rgba(200,146,255,0.5));
+  }
+  50% { 
+    filter: drop-shadow(0 0 40px rgba(200,146,255,0.8));
+  }
+}
+
+/* ========================= SERVICES ========================= */
 .main-content {
-  position: relative;
-  z-index: 4;
   background: linear-gradient(180deg, #0b0f1a 0%, #1a0d2e 100%);
 }
 
-/* Services Section */
 .services-section {
-  padding: 8rem 0 4rem;
+  padding: 6rem 0 3rem;
 }
 
 .container {
@@ -229,31 +204,26 @@
 
 .section-header {
   text-align: center;
-  margin-bottom: 6rem;
+  margin-bottom: 4rem;
 }
 
 .section-header h2 {
-  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-size: clamp(2rem, 5vw, 4rem);
   background: linear-gradient(45deg, #ffffff, #c892ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 1rem;
 }
 
 .section-header p {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   opacity: 0.85;
-  max-width: 600px;
-  margin: 0 auto;
 }
 
-/* ✅ FIXED Services Grid & Cards */
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2.5rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
 }
 
 .service-item {
@@ -267,15 +237,15 @@
 .service-card-image-wrapper {
   position: relative;
   width: 100%;
-  height: 420px;
-  border-radius: 24px;
+  height: 320px;
+  border-radius: 20px;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,0.15);
   transition: all 0.4s ease;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
   animation: floatCard 8s ease-in-out infinite;
   animation-delay: calc(var(--i, 0) * 0.2s);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .service-card-image-wrapper:hover {
@@ -299,7 +269,7 @@
 }
 
 .service-title {
-  font-size: 2rem;
+  font-size: 1.6rem;
   font-weight: 700;
   background: linear-gradient(45deg, #ffffff, #c892ff);
   -webkit-background-clip: text;
@@ -310,7 +280,7 @@
 }
 
 .service-subtitle {
-  font-size: 1.1rem;
+  font-size: 1rem;
   opacity: 0.9;
   line-height: 1.6;
   max-width: 280px;
@@ -319,41 +289,41 @@
   text-shadow: 0 1px 5px rgba(0,0,0,0.8);
 }
 
-/* Legacy service-card styles (kept for ActionCard compatibility) */
+/* Legacy service-card styles */
 .service-card {
   position: relative;
-  min-height: 420px;
-  border-radius: 24px;
+  min-height: 320px;
+  border-radius: 20px;
   overflow: hidden;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   border: 1px solid rgba(255,255,255,0.15);
   transition: all .4s ease;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
   animation: floatCard 8s ease-in-out infinite;
   animation-delay: calc(var(--i, 0) * 0.15s);
 }
 
-/* Card animations */
 @keyframes floatCard {
   0% { transform: translateY(0px); }
   50% { transform: translateY(-12px); }
   100% { transform: translateY(0px); }
 }
 
-/* CTA Button */
+/* ========================= BUTTON ========================= */
 .cta-button {
   position: relative;
   overflow: hidden;
   display: inline-block;
   background: linear-gradient(45deg, #c892ff, #8e24aa);
   color: white;
-  padding: 1rem 3rem;
+  padding: 0.9rem 2.5rem;
   border-radius: 50px;
   text-decoration: none;
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  margin-top: 1rem;
   transition: all 0.3s ease;
   box-shadow: 0 10px 30px rgba(200,146,255,0.4);
   cursor: pointer;
@@ -367,11 +337,7 @@
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(
-    circle,
-    rgba(255,255,255,0.4),
-    transparent 60%
-  );
+  background: radial-gradient(circle, rgba(255,255,255,0.4), transparent 60%);
   opacity: 0;
   transition: opacity 0.4s;
   pointer-events: none;
@@ -386,106 +352,7 @@
   box-shadow: 0 20px 40px rgba(200,146,255,0.6);
 }
 
-/* Animations */
-@keyframes glowPulse {
-  0%, 100% { 
-    filter: drop-shadow(0 0 20px rgba(200,146,255,0.5));
-  }
-  50% { 
-    filter: drop-shadow(0 0 40px rgba(200,146,255,0.8));
-  }
-}
-
-.fade-in {
-  animation: fadeInUp 1s ease-out;
-}
-
-.fade-out {
-  animation: fadeOutUp 0.5s ease-in;
-}
-
-@keyframes fadeInUp {
-  from { 
-    opacity: 0; 
-    transform: translateY(30px); 
-  }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
-  }
-}
-
-@keyframes fadeOutUp {
-  to { 
-    opacity: 0; 
-    transform: translateY(-30px); 
-  }
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .services-grid {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-  
-  .services-section {
-    padding: 4rem 0 2rem;
-  }
-  
-  .service-card-image-wrapper,
-  .service-card {
-    min-height: 350px;
-  }
-  
-  .hero-background {
-    height: 80vh;
-  }
-  
-  .symbol {
-    font-size: 3rem;
-  }
-  
-  .symbol:nth-child(odd) {
-    font-size: 2.5rem;
-  }
-  
-  .symbol:nth-child(even) {
-    font-size: 3.8rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .container {
-    padding: 0 1rem;
-  }
-  
-  .hero-title {
-    font-size: 2.5rem;
-  }
-  
-  .symbol {
-    font-size: 2.5rem;
-  }
-  
-  .service-card-image-wrapper {
-    height: 300px;
-  }
-  
-  .service-title {
-    font-size: 1.6rem;
-  }
-}
-
-/* Scrollbar styles */
-html {
-  scrollbar-width: thin !important;
-  scrollbar-color: rgba(138, 43, 226, 0.9) rgba(15, 15, 25, 0.4) !important;
-}
-/* Spector Guide */
-
-/* SPECTOR GUIDE */
-
+/* ========================= SPECTOR GUIDE ========================= */
 .spector-guide {
   display: flex;
   align-items: center;
@@ -495,8 +362,6 @@ html {
   justify-content: center;
   position: relative;
 }
-
-/* Spector image */
 
 .spector-image {
   width: 110px;
@@ -509,8 +374,6 @@ html {
 .spector-guide:hover .spector-image {
   transform: scale(1.05);
 }
-
-/* Speech bubble */
 
 .spector-bubble {
   background: rgba(20, 25, 55, 0.85);
@@ -525,8 +388,6 @@ html {
   text-align: left;
 }
 
-/* Speech bubble tail */
-
 .spector-bubble::before {
   content: "";
   position: absolute;
@@ -536,8 +397,6 @@ html {
   border-style: solid;
   border-color: transparent rgba(20, 25, 55, 0.85) transparent transparent;
 }
-
-/* Text */
 
 .spector-bubble strong {
   color: #aab3ff;
@@ -550,10 +409,93 @@ html {
   opacity: 0.9;
 }
 
-/* Floating animation */
-
 @keyframes spectorFloat {
   0% { transform: translateY(0px); }
   50% { transform: translateY(-6px); }
   100% { transform: translateY(0px); }
+}
+
+/* ========================= MOBILE OPTIMIZATION ========================= */
+@media (max-width: 768px) {
+  .hero-background {
+    min-height: 70vh;
+    padding: 3rem 0;
+  }
+  
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.95rem;
+  }
+  
+  /* Reduce symbol sizes and disable heavy animations on mobile */
+  .symbol {
+    font-size: 2.5rem;
+  }
+  
+  .symbol:nth-child(odd) {
+    font-size: 2rem;
+  }
+  
+  .symbol:nth-child(even) {
+    font-size: 3rem;
+  }
+  
+  /* Disable floating symbols animation on mobile for performance */
+  .dream-symbols {
+    display: none;
+  }
+  
+  .hero-background::before {
+    animation: none;
+  }
+  
+  .service-card-image-wrapper,
+  .service-card {
+    height: 240px;
+  }
+  
+  .services-section {
+    padding: 3rem 0;
+  }
+  
+  .services-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 1rem;
+  }
+  
+  .service-card-image-wrapper {
+    height: 200px;
+  }
+  
+  .service-title {
+    font-size: 1.3rem;
+  }
+  
+  .service-subtitle {
+    font-size: 0.85rem;
+  }
+  
+  .spector-guide {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .spector-image {
+    width: 80px;
+  }
+  
+  .spector-bubble {
+    max-width: 220px;
+    padding: 10px 12px;
+  }
 }
